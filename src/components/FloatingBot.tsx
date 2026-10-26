@@ -23,7 +23,7 @@ export default function FloatingBot() {
     {
       id: 1,
       type: "bot",
-      text: "반가워요! 두 사람의 이야기를 전하는 무지개봇이에요 🌈\n궁금한 질문을 골라보세요.",
+      text: "반가워요! 두 사람의 이야기를\n전하는 무지개봇이에요 🌈\n궁금한 질문을 골라보세요.",
     },
   ]);
 
