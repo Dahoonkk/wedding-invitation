@@ -258,7 +258,8 @@ export default function Guestbook() {
                   )}
                   <button
                     onClick={() => openDelete(msg)}
-                    className="text-[11px] text-stone-400 hover:text-rose-500 transition"
+                    aria-label={`${msg.name}님의 축하 메시지 삭제`}
+                    className="rounded-full bg-stone-100/70 px-2 py-1 text-[10px] text-stone-400 transition active:bg-rose-50 active:text-rose-500"
                   >
                     삭제
                   </button>
@@ -289,13 +290,16 @@ export default function Guestbook() {
       </div>
 
       <div className="flex items-center justify-between mb-3 px-1 max-w-[380px] mx-auto">
-        <p className="text-[12px] tracking-wide text-stone-500 font-medium">
-          최근 메시지
-        </p>
-        {messages.length > 0 && (
-          <p className="text-[11px] text-stone-400 font-mono">
-            전체 {messages.length}개
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-rose-300" />
+          <p className="text-[12px] tracking-wide text-stone-600 font-medium">
+            축하의 마음
           </p>
+        </div>
+        {messages.length > 0 && (
+          <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] text-stone-400 font-mono">
+            {messages.length}개의 메시지
+          </span>
         )}
       </div>
 
@@ -306,34 +310,46 @@ export default function Guestbook() {
 
         {messages.length === 0 && (
           <div className="relative">
-            <div className="absolute -inset-1 rounded-[26px] bg-gradient-to-br from-rose-100/25 to-sky-100/25 blur-lg pointer-events-none" />
-            <div className="relative rounded-[22px] bg-white/60 backdrop-blur-2xl border border-white/80 px-4 py-12 text-center">
-              <p className="text-[14px] text-stone-500 font-light">
-                첫 번째 축하 메시지를 남겨보세요 💌
+            <div className="absolute -inset-1 rounded-[26px] bg-gradient-to-br from-rose-100/30 via-white/10 to-sky-100/30 blur-lg pointer-events-none" />
+            <div className="relative flex flex-col items-center rounded-[22px] border border-white/80 bg-white/65 px-5 py-8 text-center shadow-[0_8px_28px_rgba(70,55,40,0.04)] backdrop-blur-2xl">
+              <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-sky-100 text-lg">
+                💌
+              </span>
+              <p className="text-[14px] font-medium text-stone-700">
+                첫 축하 메시지를 기다리고 있어요
               </p>
+              <p className="mt-1.5 text-[12px] font-light leading-relaxed text-stone-400">
+                따뜻한 한마디를 남겨 두 사람의 시작을 축복해 주세요.
+              </p>
+              <button
+                onClick={openSheet}
+                className="mt-4 rounded-full border border-rose-200/70 bg-white/80 px-4 py-2 text-[11px] font-medium text-rose-500 shadow-sm active:scale-95 transition"
+              >
+                축하 메시지 남기기
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex gap-2.5 max-w-[380px] mx-auto">
-        <button
-          onClick={openAll}
-          className="flex-1 py-3.5 rounded-2xl text-[12px] tracking-wide font-medium
-                     text-stone-700 bg-white/70 backdrop-blur-xl
-                     border border-white/90 shadow-sm active:scale-[0.98] transition"
-        >
-          전체 보기
-        </button>
-        <button
-          onClick={openSheet}
-          className="flex-[1.3] py-3.5 rounded-2xl text-[12px] tracking-wide font-medium
-                     text-white bg-rose-400/90 border border-rose-300/80
-                     shadow-[0_4px_16px_rgba(244,63,94,0.2)] active:scale-[0.98] transition"
-        >
-          작성하기
-        </button>
-      </div>
+      {messages.length > 0 && (
+        <div className="flex gap-2.5 max-w-[380px] mx-auto">
+          <button
+            onClick={openAll}
+            className="flex-1 rounded-2xl border border-white/90 bg-white/70 py-3.5 text-[12px] font-medium tracking-wide
+                       text-stone-600 shadow-sm backdrop-blur-xl active:scale-[0.98] transition"
+          >
+            메시지 모아보기
+          </button>
+          <button
+            onClick={openSheet}
+            className="flex-[1.3] rounded-2xl border border-rose-300/80 bg-gradient-to-r from-rose-400 to-rose-400/90 py-3.5 text-[12px] font-semibold tracking-wide
+                       text-white shadow-[0_6px_18px_rgba(244,63,94,0.2)] active:scale-[0.98] transition"
+          >
+            축하 메시지 남기기
+          </button>
+        </div>
+      )}
 
       {/* 전체 목록 모달 */}
       {showAll && (
@@ -362,11 +378,11 @@ export default function Guestbook() {
                 <div className="w-8" />
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
                     <p className="text-[10px] tracking-[0.25em] text-stone-400 font-bold font-mono">
                       GUESTBOOK
                     </p>
-                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
                   </div>
                   <p className="text-[15px] text-stone-800 font-medium tracking-wide">
                     전체 메시지{" "}
@@ -446,11 +462,11 @@ export default function Guestbook() {
                 <div className="w-8" />
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
                     <p className="text-[10px] tracking-[0.25em] text-stone-400 font-bold font-mono">
                       GUESTBOOK
                     </p>
-                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
                   </div>
                   <h3 className="text-[15px] text-stone-800 font-medium tracking-wide">
                     축하 메시지 남기기

@@ -1,145 +1,5 @@
 import { useEffect, useRef } from "react";
-
-// 수채화 보케 빛방울 20개 배치 데이터 (위치 / 크기 / 색상 / 애니메이션)
-const AURA_ITEMS = [
-  // 1. 인트로 (0% ~ 15%)
-  {
-    top: "2%",
-    left: "6%",
-    size: "w-20 h-20",
-    color: "bg-sky-300/30",
-    anim: "animate-[auraFloat1_9s_infinite_ease-in-out]",
-  },
-  {
-    top: "5%",
-    right: "8%",
-    size: "w-24 h-24",
-    color: "bg-rose-300/25",
-    anim: "animate-[auraFloat2_11s_infinite_ease-in-out]",
-  },
-  {
-    top: "9%",
-    left: "42%",
-    size: "w-16 h-16",
-    color: "bg-amber-200/30",
-    anim: "animate-[auraFloat3_8s_infinite_ease-in-out]",
-  },
-  {
-    top: "14%",
-    right: "28%",
-    size: "w-18 h-18",
-    color: "bg-cyan-200/25",
-    anim: "animate-[auraFloat1_10s_infinite_ease-in-out]",
-  },
-
-  // 2. 인사말 & 사진 (15% ~ 35%)
-  {
-    top: "19%",
-    left: "10%",
-    size: "w-22 h-22",
-    color: "bg-rose-300/20",
-    anim: "animate-[auraFloat2_12s_infinite_ease-in-out]",
-  },
-  {
-    top: "25%",
-    right: "6%",
-    size: "w-24 h-24",
-    color: "bg-sky-300/25",
-    anim: "animate-[auraFloat3_9s_infinite_ease-in-out]",
-  },
-  {
-    top: "31%",
-    left: "38%",
-    size: "w-16 h-16",
-    color: "bg-emerald-200/25",
-    anim: "animate-[auraFloat1_11s_infinite_ease-in-out]",
-  },
-
-  // 3. 혼주 & 달력 (35% ~ 55%)
-  {
-    top: "37%",
-    left: "8%",
-    size: "w-24 h-24",
-    color: "bg-sky-200/30",
-    anim: "animate-[auraFloat2_10s_infinite_ease-in-out]",
-  },
-  {
-    top: "43%",
-    right: "12%",
-    size: "w-20 h-20",
-    color: "bg-amber-200/30",
-    anim: "animate-[auraFloat3_13s_infinite_ease-in-out]",
-  },
-  {
-    top: "49%",
-    left: "48%",
-    size: "w-18 h-18",
-    color: "bg-rose-300/20",
-    anim: "animate-[auraFloat1_8s_infinite_ease-in-out]",
-  },
-
-  // 4. 오시는길 (55% ~ 70%)
-  {
-    top: "56%",
-    right: "8%",
-    size: "w-22 h-22",
-    color: "bg-cyan-300/25",
-    anim: "animate-[auraFloat2_11s_infinite_ease-in-out]",
-  },
-  {
-    top: "62%",
-    left: "12%",
-    size: "w-20 h-20",
-    color: "bg-rose-200/25",
-    anim: "animate-[auraFloat3_9s_infinite_ease-in-out]",
-  },
-  {
-    top: "68%",
-    right: "36%",
-    size: "w-16 h-16",
-    color: "bg-emerald-200/20",
-    anim: "animate-[auraFloat1_12s_infinite_ease-in-out]",
-  },
-
-  // 5. 갤러리 & 계좌 (70% ~ 88%)
-  {
-    top: "74%",
-    left: "6%",
-    size: "w-24 h-24",
-    color: "bg-sky-300/25",
-    anim: "animate-[auraFloat2_10s_infinite_ease-in-out]",
-  },
-  {
-    top: "80%",
-    right: "10%",
-    size: "w-20 h-20",
-    color: "bg-amber-300/25",
-    anim: "animate-[auraFloat3_11s_infinite_ease-in-out]",
-  },
-  {
-    top: "86%",
-    left: "38%",
-    size: "w-18 h-18",
-    color: "bg-rose-300/25",
-    anim: "animate-[auraFloat1_9s_infinite_ease-in-out]",
-  },
-
-  // 6. 방명록 & 마감 (88% ~ 100%)
-  {
-    top: "91%",
-    left: "14%",
-    size: "w-20 h-20",
-    color: "bg-cyan-200/25",
-    anim: "animate-[auraFloat2_12s_infinite_ease-in-out]",
-  },
-  {
-    top: "96%",
-    right: "8%",
-    size: "w-22 h-22",
-    color: "bg-sky-200/30",
-    anim: "animate-[auraFloat3_10s_infinite_ease-in-out]",
-  },
-];
+import { AURA_ITEMS } from "../data/auraItems";
 
 export default function BackgroundAura() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -184,12 +44,13 @@ export default function BackgroundAura() {
         {AURA_ITEMS.map((item, index) => (
           <div
             key={index}
-            className={`absolute ${item.size} rounded-full ${item.color} blur-xl ${item.anim} transform-gpu will-change-transform`}
+            className={`absolute ${item.size} ${item.shape === "diamond" ? "rotate-45 rounded-[1px]" : "rounded-full"} ${item.color} ${item.blur ?? "blur-xl"} ${item.anim} transform-gpu will-change-transform`}
             style={{
               top: item.top,
               left: item.left,
               right: item.right,
               animationDelay: `-${(index * 1.3) % 7}s`,
+              boxShadow: item.glow?.replace("shadow-[", "").replace("]", ""),
             }}
           />
         ))}
@@ -210,6 +71,21 @@ export default function BackgroundAura() {
         @keyframes auraFloat3 {
           0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
           50% { transform: translate(42px, 36px) scale(1.12); opacity: 0.6; }
+        }
+        @keyframes auraSparkle {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(0.72); opacity: 0.28; }
+          50% { transform: translate3d(7px, -11px, 0) scale(1.2); opacity: 0.82; }
+        }
+        @keyframes auraDrift1 {
+          0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.4; }
+          50% { transform: translate3d(12px, -18px, 0); opacity: 0.76; }
+        }
+        @keyframes auraDrift2 {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(0.85); opacity: 0.38; }
+          50% { transform: translate3d(-10px, 14px, 0) scale(1.08); opacity: 0.7; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .will-change-transform { animation: none !important; }
         }
       `}</style>
     </div>

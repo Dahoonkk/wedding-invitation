@@ -98,12 +98,13 @@ export default function Gallery() {
 
         <div className="relative space-y-2.5">
           {previewImages[0] && (
-            <div
+            <button
+              type="button"
               onClick={() => setLightboxIndex(0)}
-              className="group relative rounded-[22px] overflow-hidden
-                         border border-white/50 bg-white/20 backdrop-blur-md
-                         shadow-[0_12px_32px_rgba(0,0,0,0.06)]
-                         aspect-[4/4.6] cursor-pointer active:scale-[0.99] transition-all duration-300"
+              aria-label="대표 사진 크게 보기"
+              className="group relative block w-full overflow-hidden rounded-[24px]
+                         border border-white/70 bg-white/30 shadow-[0_14px_34px_rgba(70,55,40,0.09)]
+                         aspect-[4/4.6] cursor-pointer transition duration-500 hover:shadow-[0_18px_40px_rgba(70,55,40,0.14)] active:scale-[0.99]"
             >
               <img
                 src={getSrc(previewImages[0], 0)}
@@ -111,8 +112,8 @@ export default function Gallery() {
                 draggable={false}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-black/10 pointer-events-none" />
-            </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-stone-950/20 pointer-events-none" />
+            </button>
           )}
 
           {previewImages.length > 1 && (
@@ -120,13 +121,14 @@ export default function Gallery() {
               {previewImages.slice(1, 3).map((src, idx) => {
                 const actualIndex = idx + 1;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={actualIndex}
                     onClick={() => setLightboxIndex(actualIndex)}
-                    className="group relative rounded-[16px] overflow-hidden
-                               border border-white/50 bg-white/20 backdrop-blur-md
-                               shadow-[0_8px_24px_rgba(0,0,0,0.05)]
-                               aspect-[3/3.6] cursor-pointer active:scale-[0.98] transition-all duration-300"
+                    aria-label={`사진 ${actualIndex + 1} 크게 보기`}
+                    className="group relative block w-full overflow-hidden rounded-[18px]
+                               border border-white/70 bg-white/25 shadow-[0_8px_22px_rgba(70,55,40,0.07)]
+                               aspect-[3/3.6] cursor-pointer transition duration-500 hover:shadow-[0_12px_28px_rgba(70,55,40,0.12)] active:scale-[0.98]"
                   >
                     <img
                       src={getSrc(src, actualIndex)}
@@ -135,7 +137,7 @@ export default function Gallery() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none"
                     />
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none" />
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -146,13 +148,14 @@ export default function Gallery() {
               {previewImages.slice(3, 5).map((src, idx) => {
                 const actualIndex = idx + 3;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={actualIndex}
                     onClick={() => setLightboxIndex(actualIndex)}
-                    className="group relative rounded-[16px] overflow-hidden
-                               border border-white/50 bg-white/20 backdrop-blur-md
-                               shadow-[0_8px_24px_rgba(0,0,0,0.05)]
-                               aspect-[3/3.6] cursor-pointer active:scale-[0.98] transition-all duration-300"
+                    aria-label={`사진 ${actualIndex + 1} 크게 보기`}
+                    className="group relative block w-full overflow-hidden rounded-[18px]
+                               border border-white/70 bg-white/25 shadow-[0_8px_22px_rgba(70,55,40,0.07)]
+                               aspect-[3/3.6] cursor-pointer transition duration-500 hover:shadow-[0_12px_28px_rgba(70,55,40,0.12)] active:scale-[0.98]"
                   >
                     <img
                       src={getSrc(src, actualIndex)}
@@ -161,7 +164,7 @@ export default function Gallery() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none"
                     />
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none" />
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -179,9 +182,9 @@ export default function Gallery() {
                      shadow-[0_4px_16px_rgba(0,0,0,0.04)]
                      active:scale-95 transition"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-          전체 사진보기 ({images.length})
           <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+          전체 사진보기 ({images.length})
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
         </button>
       </div>
 
@@ -215,11 +218,11 @@ export default function Gallery() {
                 <div className="w-8" />
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
                     <p className="text-[10px] tracking-[0.25em] text-stone-400 font-bold font-mono">
                       GALLERY
                     </p>
-                    <span className="w-1 h-1 rounded-full bg-sky-400/80" />
+                    <span className="w-1 h-1 rounded-full bg-rose-400/80" />
                   </div>
                   <p className="text-[16px] text-stone-800 font-medium tracking-wide">
                     전체 사진 ({images.length})

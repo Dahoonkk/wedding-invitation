@@ -106,6 +106,7 @@ function AccountRow({
 
         <button
           onClick={handleCopy}
+          aria-label={`${holder} 계좌번호 복사`}
           className={`shrink-0 min-w-[62px] px-3 py-2 rounded-full
                       text-[11px] tracking-wide font-medium
                       border transition-all duration-300 active:scale-95
@@ -115,7 +116,10 @@ function AccountRow({
                           : "bg-white/85 border-white/90 text-stone-600 shadow-sm"
                       }`}
         >
-          {copied ? "복사됨" : "복사"}
+          <span aria-hidden="true" className="mr-1">
+            {copied ? "✓" : "⧉"}
+          </span>
+          {copied ? "복사됨" : "계좌 복사"}
         </button>
       </div>
 
@@ -158,11 +162,11 @@ function AccordionItem({
 
   const styles = {
     sky: {
-      glow: "from-sky-200/25 via-white/10 to-cyan-100/20",
+      glow: "from-sky-200/30 via-white/15 to-cyan-100/25",
       badge: "bg-sky-50/90 border-sky-200/80 text-sky-600",
     },
     orange: {
-      glow: "from-orange-200/25 via-white/10 to-rose-100/20",
+      glow: "from-orange-200/30 via-white/15 to-rose-100/25",
       badge: "bg-orange-50/90 border-orange-200/80 text-orange-600",
     },
   };
@@ -179,8 +183,10 @@ function AccordionItem({
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent pointer-events-none" />
 
         <button
+          type="button"
+          aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
-          className="w-full flex items-center justify-between px-5 py-4 text-left active:bg-white/40 transition-colors"
+          className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors active:bg-white/40"
         >
           <div className="flex items-center gap-3">
             <div
@@ -189,17 +195,18 @@ function AccordionItem({
             >
               {icon}
             </div>
-            <span className="text-[13px] md:text-[14px] font-medium text-stone-800 tracking-wide">
+            <span className="block text-[13px] font-medium tracking-wide text-stone-800 md:text-[14px]">
               {title}
             </span>
           </div>
 
-          <span
-            className={`w-7 h-7 rounded-full bg-white/80 border border-white/90 shadow-sm
-                        text-stone-400 text-[10px] flex items-center justify-center
-                        transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          >
-            ▼
+          <span className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={`flex h-7 w-7 items-center justify-center rounded-full border border-white/90 bg-white/80 text-[10px] text-stone-400 shadow-sm transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+            >
+              ▼
+            </span>
           </span>
         </button>
 
@@ -209,7 +216,7 @@ function AccordionItem({
           }`}
         >
           <div className="px-4 pb-4 pt-1">
-            <div className="rounded-2xl bg-white/50 border border-white/80 px-4">
+            <div className="rounded-2xl border border-white/80 bg-white/55 px-4">
               {accounts.map((acc, i) => (
                 <AccountRow key={i} {...acc} accent={accent} />
               ))}
@@ -226,7 +233,7 @@ export default function Account() {
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
       <div className="flex flex-col items-center mb-8">
         <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
-          ACCOUNT
+          WARM HEARTS
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
       </div>
@@ -235,26 +242,26 @@ export default function Account() {
         <p className="text-[15px] md:text-[16px] leading-[1.85] text-stone-600 font-light">
           직접 모시지 못하는 아쉬운 마음을 담아
           <br />
-          멀리서 축하를 전해주시는 분들을 위해
+          축하의 마음을 전하고 싶으신 분들을 위해
           <br />
-          마음 전하실 곳을 안내해 드립니다.
+          마음 전하실 곳을 안내드립니다.
         </p>
         <p className="text-[15px] md:text-[16px] leading-[1.85] text-stone-600 font-light">
-          보내주신 소중한 사랑 깊이 간직하여
+          보내주신 따뜻한 마음 소중히 간직하며
           <br />
-          서로를 온전히 품어주며 예쁘게 살겠습니다.
+          서로 아끼고 사랑하며 행복하게 살겠습니다.
         </p>
       </div>
 
       <div className="space-y-4">
         <AccordionItem
-          title="신랑측 마음 전하기"
+          title="신랑측 물의 마음 전하기"
           icon="💧"
           accent="sky"
           accounts={WEDDING.accounts.groom}
         />
         <AccordionItem
-          title="신부측 마음 전하기"
+          title="신부측 불의 마음 전하기"
           icon="🔥"
           accent="orange"
           accounts={WEDDING.accounts.bride}

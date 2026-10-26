@@ -44,7 +44,7 @@ function App() {
               <TitleBar />
               <MusicPlayer />
 
-              <div className="pt-11 pb-10">
+              <div className="pt-11 pb-28">
                 <Hero />
                 <SubPhoto />
                 <Greeting />

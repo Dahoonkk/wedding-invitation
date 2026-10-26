@@ -9,10 +9,10 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase("photo"), 700),
-      setTimeout(() => setPhase("text"), 2000),
-      setTimeout(() => setPhase("exit"), 4200),
-      setTimeout(() => onComplete(), 5000),
+      setTimeout(() => setPhase("photo"), 450),
+      setTimeout(() => setPhase("text"), 1300),
+      setTimeout(() => setPhase("exit"), 4000),
+      setTimeout(() => onComplete(), 4700),
     ];
     return () => timers.forEach(clearTimeout);
   }, [onComplete]);
@@ -104,13 +104,20 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
             </p>
 
             <h1
-              className={`intro-handwriting text-white text-[36px] md:text-[38px] leading-tight tracking-wide
-                         drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] ${
-                           phase === "text" ? "intro-handwriting--active" : ""
-                         }`}
+              aria-label="We are getting Married"
+              className="intro-handwriting text-white text-[36px] md:text-[38px] leading-tight tracking-wide drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)]"
               style={{ fontFamily: "'Great Vibes', cursive" }}
             >
-              We are getting Married
+              {Array.from("We are getting Married").map((character, index) => (
+                <span
+                  key={`${character}-${index}`}
+                  aria-hidden="true"
+                  className={`intro-letter ${phase === "text" ? "intro-letter--active" : ""}`}
+                  style={{ animationDelay: `${index * 55}ms` }}
+                >
+                  {character === " " ? "\u00a0" : character}
+                </span>
+              ))}
             </h1>
 
             <div className="mt-5 flex items-center justify-center gap-2">

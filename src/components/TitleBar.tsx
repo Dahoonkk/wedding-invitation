@@ -2,10 +2,37 @@ import { useEffect, useState } from "react";
 
 export default function TitleBar() {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("WEDDINGRAM");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      setScrolled(scrollY > 16);
+
+      if (scrollY < 100) {
+        setActiveSection("WEDDINGRAM");
+        return;
+      }
+
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>("#root section"),
+      );
+      const currentSection = sections.find((section) => {
+        const bounds = section.getBoundingClientRect();
+        return bounds.top <= 110 && bounds.bottom > 110;
+      });
+
+      if (currentSection) {
+        const heading = currentSection
+          .querySelector("p")
+          ?.textContent?.replace(/\s+/g, " ")
+          .trim();
+        if (heading) setActiveSection(heading.slice(0, 22));
+      }
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -17,8 +44,7 @@ export default function TitleBar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-40 flex justify-center pointer-events-none">
       <div
-        onClick={scrollToTop}
-        className={`pointer-events-auto cursor-pointer w-full max-w-[430px] h-12 flex items-center px-4 transition-all duration-300 ${
+        className={`pointer-events-auto w-full max-w-[430px] h-12 flex items-center px-4 transition-all duration-300 ${
           scrolled
             ? "bg-white/70 backdrop-blur-2xl border-b border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.7)]"
             : "bg-white/35 backdrop-blur-xl border-b border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
@@ -33,9 +59,16 @@ export default function TitleBar() {
 
         {/* 메인 타이틀 */}
         <div className="flex-1 text-center">
-          <span className="text-[11px] md:text-[12px] text-stone-600 tracking-[0.22em] font-mono font-medium uppercase">
-            OUR WEDDING
-          </span>
+          <button
+            type="button"
+            onClick={scrollToTop}
+            aria-label="청첩장 맨 위로 이동"
+            className="rounded-full px-3 py-1 text-[11px] md:text-[12px] text-stone-600 tracking-[0.22em] font-mono font-medium uppercase transition-colors hover:bg-white/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70"
+          >
+            <span className="block max-w-[190px] truncate transition-all duration-200">
+              {activeSection}
+            </span>
+          </button>
         </div>
 
         {/* 우측 엘리멘탈 물(Cyan) × 불(Rose) 포인트 */}

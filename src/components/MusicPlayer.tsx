@@ -114,19 +114,33 @@ export default function MusicPlayer() {
                       : "opacity-0 -translate-y-2"
                   }`}
     >
-      <div className="relative w-full max-w-[430px] flex justify-end px-4 pt-2 pointer-events-auto">
-        {/* 문구와 버튼을 같은 높이의 중앙축에 맞춤 */}
+      <div className="relative w-full max-w-[430px] flex justify-end px-4 pt-1 pointer-events-auto">
+        {/* 한 줄 음악 안내와 플레이어 버튼 */}
         <div
-          className={`absolute right-14 top-2 flex h-9 items-center transition-all duration-500 whitespace-nowrap
+          className={`absolute right-14 top-1 flex h-9 max-w-[calc(100%-4.5rem)] items-center transition-all duration-500
                       ${
                         showHint && isPlaying
                           ? "opacity-100 translate-x-0"
-                          : "opacity-0 translate-x-2 pointer-events-none"
+                          : "pointer-events-none translate-x-1 opacity-0"
                       }`}
         >
-          <span className="text-[11px] tracking-wide text-stone-800 bg-white/70 backdrop-blur-md border border-white/60 px-2.5 py-1 rounded-full shadow-sm">
-            음악이 재생 중이에요
-          </span>
+          <div className="flex h-8 min-w-0 items-center gap-2 rounded-full border border-white/75 bg-white/75 px-2.5 shadow-[0_3px_12px_rgba(70,55,40,0.07)] backdrop-blur-lg">
+            <div
+              aria-hidden="true"
+              className="flex h-5 w-5 shrink-0 items-center justify-center gap-[2px] rounded-full bg-gradient-to-br from-sky-100 to-rose-100"
+            >
+              <span className="h-1.5 w-[2px] rounded-full bg-sky-500/80 animate-pulse" />
+              <span className="h-3 w-[2px] rounded-full bg-rose-400/90 animate-pulse [animation-delay:120ms]" />
+              <span className="h-2 w-[2px] rounded-full bg-orange-400/80 animate-pulse [animation-delay:240ms]" />
+            </div>
+            <div className="flex min-w-0 items-center gap-1.5 whitespace-nowrap leading-none">
+              <span className="truncate text-[10px] font-semibold text-stone-800">
+                Steal The Show
+              </span>
+              <span className="text-[9px] text-stone-400">·</span>
+              <span className="shrink-0 text-[9px] text-stone-500">Lauv</span>
+            </div>
+          </div>
         </div>
 
         {/* 버튼 위치는 항상 동일 */}

@@ -103,6 +103,7 @@ const GUIDE_ITEMS = [
 export default function Location() {
   const [copied, setCopied] = useState(false);
   const [showManualCopy, setShowManualCopy] = useState(false);
+  const [showTMapFallback, setShowTMapFallback] = useState(false);
 
   const handleCopyAddress = async () => {
     const success = await tryCopy(WEDDING.location.address);
@@ -138,12 +139,15 @@ export default function Location() {
     const appUrl = `tmap://search?name=${encodeURIComponent(
       WEDDING.location.name2,
     )}`;
-    const webUrl = `https://www.tmap.co.kr/tmap2/mobile/route.jsp?name=${encodeURIComponent(
-      WEDDING.location.name2,
-    )}`;
+    setShowTMapFallback(true);
+
+    // 앱이 설치되어 있으면 앱의 장소 검색을 열고, 없으면 아래 웹 링크를 이용하게 함
     window.location.href = appUrl;
-    setTimeout(() => window.open(webUrl, "_blank"), 500);
   };
+
+  const tMapWebUrl = `https://www.tmap.co.kr/tmap2/mobile/route.jsp?name=${encodeURIComponent(
+    WEDDING.location.name2,
+  )}`;
 
   return (
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
@@ -161,7 +165,7 @@ export default function Location() {
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent" />
 
           {/* 지도 */}
-          <div className="w-full aspect-[16/10] bg-stone-100 relative border-b border-stone-200/40">
+          <div className="relative w-full aspect-[16/10] bg-stone-100 border-b border-stone-200/40">
             <iframe
               src={`https://maps.google.com/maps?q=${encodeURIComponent(
                 WEDDING.location.name,
@@ -175,22 +179,25 @@ export default function Location() {
               className="w-full h-full"
               title="오시는 길"
             />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white/20 to-transparent" />
           </div>
 
           <div className="p-5 md:p-6">
             {/* 장소 / 주소 */}
-            <div className="text-center mb-5 pb-5 border-b border-stone-200/40">
-              <p className="text-[17px] md:text-[18px] font-semibold text-stone-800 tracking-wide">
-                {WEDDING.location.name}
-              </p>
-
-              <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap px-1">
-                <p className="text-[14px] md:text-[15px] text-stone-600 leading-relaxed font-light">
-                  {WEDDING.location.address}
-                </p>
+            <div className="mb-5 border-b border-stone-200/40 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[17px] font-semibold tracking-wide text-stone-800 md:text-[18px]">
+                    {WEDDING.location.name}
+                  </p>
+                  <p className="mt-1 text-[13px] font-light leading-relaxed text-stone-500 md:text-[14px]">
+                    {WEDDING.location.address}
+                  </p>
+                </div>
                 <button
                   onClick={handleCopyAddress}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full
+                  aria-label="예식장 주소 복사"
+                  className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5
                              text-[11px] font-medium transition active:scale-95
                              ${
                                copied
@@ -224,66 +231,94 @@ export default function Location() {
                 </div>
               )}
 
-              <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
-                <button
-                  onClick={openKakaoMap}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                             text-[12px] font-medium text-stone-700 bg-white/80 border border-white/90
-                             shadow-sm active:scale-95 transition"
-                >
-                  <KakaoIcon />
-                  카카오맵
-                </button>
-                <button
-                  onClick={openNaverMap}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                             text-[12px] font-medium text-stone-700 bg-white/80 border border-white/90
-                             shadow-sm active:scale-95 transition"
-                >
-                  <NaverIcon />
-                  네이버지도
-                </button>
-                <button
-                  onClick={openTMap}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                             text-[12px] font-medium text-stone-700 bg-white/80 border border-white/90
-                             shadow-sm active:scale-95 transition"
-                >
-                  <TmapIcon />
-                  T맵
-                </button>
+              <div className="mt-5">
+                <p className="mb-2.5 px-1 text-[10px] font-semibold tracking-[0.2em] text-stone-400">
+                  OPEN IN MAPS
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={openKakaoMap}
+                    className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
+                             border border-[#FEE500]/70 bg-[#FFFBE0]/80 px-2 text-[11px] font-semibold text-stone-700
+                             shadow-[0_5px_16px_rgba(70,55,40,0.045)] active:scale-95 transition"
+                  >
+                    <KakaoIcon />
+                    카카오맵
+                  </button>
+                  <button
+                    onClick={openNaverMap}
+                    className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
+                             border border-emerald-100 bg-emerald-50/60 px-2 text-[11px] font-medium text-stone-700
+                             active:scale-95 transition"
+                  >
+                    <NaverIcon />
+                    네이버 지도
+                  </button>
+                  <button
+                    onClick={openTMap}
+                    className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
+                             border border-blue-100 bg-blue-50/60 px-2 text-[11px] font-medium text-stone-700
+                             active:scale-95 transition"
+                  >
+                    <TmapIcon />
+                    T맵
+                  </button>
+                </div>
               </div>
+
+              {showTMapFallback && (
+                <div className="mt-3 rounded-2xl bg-sky-50/75 px-4 py-3 text-center">
+                  <p className="text-[12px] text-stone-600">
+                    T맵 앱이 열리지 않았나요?
+                  </p>
+                  <a
+                    href={tMapWebUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex min-h-10 items-center justify-center px-2 text-[12px] font-semibold text-sky-700 underline underline-offset-4"
+                  >
+                    브라우저에서 T맵 길찾기 열기
+                  </a>
+                </div>
+              )}
             </div>
 
-            {/* 교통 안내 - 미니멀 */}
-            <div className="space-y-4">
-              {GUIDE_ITEMS.map((item, index) => (
-                <div key={item.id}>
-                  {index > 0 && (
-                    <div className="mb-4 h-px bg-gradient-to-r from-transparent via-stone-200/80 to-transparent" />
-                  )}
+            {/* 교통 안내 */}
+            <div className="mt-6">
+              <div className="mb-3 flex items-center gap-2 px-1">
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-stone-200" />
+                <p className="text-[10px] font-semibold tracking-[0.2em] text-stone-400">
+                  GETTING THERE
+                </p>
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-stone-200" />
+              </div>
+              <div className="space-y-2.5">
+                {GUIDE_ITEMS.map((item) => (
+                  <div key={item.id}>
+                    <div className="rounded-2xl border border-white/80 bg-white/55 px-3.5 py-3">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100/80 text-[14px] leading-none">
+                          {item.icon}
+                        </span>
+                        <span className="text-[11px] font-semibold tracking-[0.14em] text-stone-600">
+                          {item.label}
+                        </span>
+                      </div>
 
-                  <div className="flex items-center gap-2 mb-2.5">
-                    <span className="text-[14px] leading-none opacity-80">
-                      {item.icon}
-                    </span>
-                    <span className="text-[12px] tracking-[0.18em] text-stone-500 font-medium">
-                      {item.label}
-                    </span>
+                      <div className="space-y-1 pl-9">
+                        {item.lines.map((line) => (
+                          <p
+                            key={line}
+                            className="text-[13px] font-light leading-[1.7] text-stone-700 md:text-[14px]"
+                          >
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="pl-6 space-y-1">
-                    {item.lines.map((line) => (
-                      <p
-                        key={line}
-                        className="text-[14px] md:text-[15px] text-stone-700 leading-[1.75] font-light"
-                      >
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { openLoveTerminal } from "./LoveTerminal";
 
 const baseColors = [
   "#38bdf8",
@@ -80,8 +81,27 @@ export default function Closing() {
   const pendingRef = useRef(0);
   const flushTimerRef = useRef<number | null>(null);
   const lastFlushAtRef = useRef(0);
+  const terminalTapCountRef = useRef(0);
+  const terminalResetTimerRef = useRef<number | null>(null);
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  const handleCreatorMarkTap = () => {
+    terminalTapCountRef.current += 1;
+    if (terminalResetTimerRef.current) {
+      window.clearTimeout(terminalResetTimerRef.current);
+    }
+
+    if (terminalTapCountRef.current >= 5) {
+      terminalTapCountRef.current = 0;
+      openLoveTerminal();
+      return;
+    }
+
+    terminalResetTimerRef.current = window.setTimeout(() => {
+      terminalTapCountRef.current = 0;
+    }, 1800);
+  };
 
   // 초기 카운트 로드
   useEffect(() => {
@@ -258,7 +278,7 @@ export default function Closing() {
 
       <div className="flex flex-col items-center mb-8">
         <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
-          THE END
+          THANK YOU
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
       </div>
@@ -292,12 +312,20 @@ export default function Closing() {
 
         <div className="w-8 h-px bg-gradient-to-r from-transparent via-stone-300 to-transparent mx-auto" />
 
-        <div className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-stone-400">
-          <span>Made with love by</span>
-          <span className="font-medium text-stone-700 normal-case tracking-wide flex items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-stone-400">
+          <button
+            type="button"
+            onClick={handleCreatorMarkTap}
+            aria-label="숨겨진 개발자 이스터에그 열기"
+            className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"
+          >
+            Made by us, with love
+          </button>
+          <span className="font-medium text-stone-700 normal-case tracking-wide flex items-center gap-1.5 text-[12px]">
             <span>다훈</span>
-            <span className="text-[9px]">💧</span>
-            <span className="text-[9px]">🔥</span>
+            <span className="text-[10px]">💧</span>
+            <span className="text-[10px]">×</span>
+            <span className="text-[10px]">🔥</span>
             <span>은하</span>
           </span>
         </div>
@@ -306,7 +334,7 @@ export default function Closing() {
       <div className="flex items-center gap-2.5 mb-3">
         <button
           onClick={handleCopyLink}
-          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+          className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
                       text-[12px] tracking-wide font-medium
                       backdrop-blur-xl border transition-all duration-300
                       ${
@@ -321,10 +349,10 @@ export default function Closing() {
 
         <button
           onClick={handleLike}
-          className={`group inline-flex items-center gap-2 px-4.5 py-2.5 rounded-full
+          aria-label={`좋아요 ${likes}개`}
+          className={`group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full px-4
                      bg-white/70 backdrop-blur-xl border border-white/90
-                     shadow-sm text-stone-700
-                     active:scale-95 transition-all duration-300 ${
+                     shadow-sm text-stone-700 active:scale-95 transition-all duration-300 ${
                        isLiking ? "scale-105" : ""
                      }`}
         >

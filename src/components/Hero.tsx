@@ -88,7 +88,7 @@ export default function Hero() {
         <div
           className={`relative rounded-3xl bg-white/65 backdrop-blur-2xl border border-white/80
                       shadow-[0_18px_50px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.95)]
-                      px-6 pt-6 pb-6 text-center
+                      px-6 pt-5 pb-5 text-center
                       transition-all duration-700 ease-out ${
                         visible
                           ? "opacity-100 translate-y-0"
@@ -98,7 +98,7 @@ export default function Hero() {
           <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
 
           <p
-            className="text-[28px] text-stone-700 mb-4"
+            className="mb-3 text-[23px] text-stone-700"
             style={{ fontFamily: "'Great Vibes', cursive" }}
           >
             Our Beginning
@@ -108,7 +108,7 @@ export default function Hero() {
           <button
             type="button"
             onClick={openPhoto}
-            className="relative w-[100px] h-[100px] mx-auto mb-4 rounded-full
+            className="relative mx-auto mb-3 h-[104px] w-[104px] rounded-full
                        p-[3px] bg-gradient-to-br from-cyan-300 via-rose-300 to-orange-300
                        shadow-[0_8px_24px_rgba(244,114,182,0.25)]
                        active:scale-95 transition-transform duration-200"
@@ -124,32 +124,32 @@ export default function Hero() {
           </button>
 
           {/* 이름 */}
-          <h1 className="text-[24px] font-light tracking-[0.04em] text-stone-800">
+          <h1 className="text-[22px] font-medium tracking-[0.04em] text-stone-800">
             <span className="text-sky-600">{WEDDING.groom.name}</span>
             <span className="mx-2.5 text-rose-400">♥</span>
             <span className="text-orange-500">{WEDDING.bride.name}</span>
           </h1>
 
           {/* 날짜 */}
-          <p className="mt-2.5 text-[13px] md:text-[14px] text-stone-500 tracking-wide">
+          <p className="mt-1.5 text-[13px] md:text-[14px] text-stone-500 tracking-wide">
             {dateStr}
           </p>
 
           {/* D-DAY 라벨 */}
-          <div className="mt-5 flex items-center justify-center gap-2.5">
+          <div className="mt-4 flex items-center justify-center gap-2.5">
             <span className="w-10 h-px bg-gradient-to-r from-transparent to-sky-300/80" />
-            <span className="text-[11px] md:text-[12px] tracking-[0.22em] text-stone-500 font-medium">
+            <span className="text-[10px] md:text-[11px] tracking-[0.22em] text-stone-400 font-semibold">
               D-DAY
             </span>
             <span className="w-10 h-px bg-gradient-to-l from-transparent to-orange-300/80" />
           </div>
 
-          <p className="mt-3 text-[12px] md:text-[13px] tracking-[0.12em] text-stone-500">
+          <p className="mt-2.5 text-[12px] md:text-[13px] tracking-[0.12em] text-stone-500">
             우리의 무지개가 피어나기까지
           </p>
 
           {/* 박스 없는 카운트다운 */}
-          <div className="mt-4 flex items-end justify-center gap-5">
+          <div className="mt-4 flex items-end justify-center gap-4">
             {[
               { label: "DAYS", value: timeLeft.days, color: "text-sky-500" },
               { label: "HRS", value: timeLeft.hours, color: "text-rose-500" },
@@ -159,8 +159,8 @@ export default function Hero() {
                 color: "text-orange-500",
               },
             ].map((item, i) => (
-              <div key={item.label} className="flex items-end gap-5">
-                <div className="flex flex-col items-center min-w-[52px]">
+              <div key={item.label} className="flex items-end gap-4">
+                <div className="flex min-w-[58px] flex-col items-center">
                   <p
                     className={`text-[22px] md:text-[24px] font-semibold tabular-nums leading-none ${item.color}`}
                   >
@@ -212,7 +212,7 @@ export default function Hero() {
                   className="text-[19px] text-stone-700 text-center"
                   style={{ fontFamily: "'Nanum Pen Script', cursive" }}
                 >
-                  {WEDDING.groom.name} ♥ {WEDDING.bride.name}
+                  웨딩 촬영 날 ♥
                 </p>
               </div>
             </div>

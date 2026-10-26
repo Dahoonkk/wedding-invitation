@@ -21,16 +21,77 @@ export default function Calendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
-  const days = ["S", "M", "T", "W", "T", "F", "S"];
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dates = Array.from({ length: lastDate }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
+
+  const addToCalendar = () => {
+    const [datePart, timePart = "00:00:00"] = WEDDING.date.split("T");
+    const [eventYear, eventMonth, eventDay] = datePart.split("-");
+    const [eventHour, eventMinute] = timePart.split(":");
+    const startDate = `${eventYear}${eventMonth}${eventDay}T${eventHour}${eventMinute}00`;
+    const endDate = new Date(weddingDate.getTime() + 2 * 60 * 60 * 1000);
+    const endParts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(endDate);
+    const endValues = Object.fromEntries(
+      endParts.map(({ type, value }) => [type, value]),
+    );
+    const endDateTime = `${endValues.year}${endValues.month}${endValues.day}T${endValues.hour}${endValues.minute}00`;
+    const escapeIcsText = (value: string) =>
+      value
+        .replace(/\\/g, "\\\\")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
+        .replace(/\n/g, "\\n");
+    const eventUrl = "https://dahoonkk.github.io/wedding-invitation/";
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Wedding Invitation//KO",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VEVENT",
+      `UID:wedding-${eventYear}${eventMonth}${eventDay}-${eventHour}${eventMinute}@dahoonkk.github.io`,
+      `DTSTAMP:${new Date()
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\.\d{3}/, "")}`,
+      `DTSTART;TZID=Asia/Seoul:${startDate}`,
+      `DTEND;TZID=Asia/Seoul:${endDateTime}`,
+      `SUMMARY:${escapeIcsText("다훈 ♥ 은하 결혼식")}`,
+      `LOCATION:${escapeIcsText(`${WEDDING.location.name} ${WEDDING.location.address}`)}`,
+      `DESCRIPTION:${escapeIcsText(`다훈과 은하의 결혼식에 초대합니다.\\n${eventUrl}`)}`,
+      `URL:${eventUrl}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+
+    const file = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const downloadUrl = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = "dahoon-eunha-wedding.ics";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+  };
 
   return (
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
       {/* 라벨 */}
       <div className="flex flex-col items-center mb-8">
         <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
-          SAVE THE DATE
+          OUR WEDDING DAY
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
       </div>
@@ -45,7 +106,7 @@ export default function Calendar() {
             {/* 헤더 */}
             <div className="text-center mb-7">
               <p className="text-[21px] md:text-[23px] text-stone-800 font-light tracking-wide">
-                {year}. {String(month + 1).padStart(2, "0")}
+                {year}년 {month + 1}월
               </p>
               <p className="mt-1.5 text-[14px] text-stone-500 font-light">
                 {weddingDay}일 · {weekdayLabel}요일
@@ -95,8 +156,8 @@ export default function Calendar() {
                     className="flex justify-center items-center h-10"
                   >
                     {isWedding ? (
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 via-amber-300 to-sky-400 flex items-center justify-center shadow-[0_4px_14px_rgba(244,63,94,0.3)]">
-                        <span className="text-white text-[14px] font-semibold">
+                      <div className="calendar-wedding-day relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 via-amber-300 to-sky-400">
+                        <span className="relative z-10 text-[14px] font-semibold text-white">
                           {date}
                         </span>
                       </div>
@@ -117,6 +178,20 @@ export default function Calendar() {
                 );
               })}
             </div>
+
+            <button
+              type="button"
+              onClick={addToCalendar}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-rose-200/70 bg-white/75 px-4 py-3 text-[13px] font-medium text-stone-700 shadow-[0_5px_16px_rgba(244,63,94,0.08)] transition active:scale-[0.98]"
+            >
+              <span aria-hidden="true" className="text-rose-400">
+                ♡
+              </span>
+              <span>우리의 약속, 캘린더에 저장</span>
+              <span aria-hidden="true" className="text-sky-400">
+                ＋
+              </span>
+            </button>
           </div>
         </div>
       </div>

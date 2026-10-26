@@ -11,6 +11,8 @@ const QA_DATA = {
     "영화에 나오는 두 주인공의 모습이 꼭 저희 같았어요.\n'완전 우리 같다' 하면서 울컥했던 추억이 있어요!\n그래서 저희만의 새로운 무지개를 피우기 위해 컨셉을\n<엘리멘탈>로 잡아보았습니다 🔥💧",
   "💡 또 다른 TMI가 있어?":
     "사실 어머니들끼리 생일이 똑같아요!\n이런게 또 인연인거겠죠??",
+  "🖥️ 숨겨진 이스터에그가 있어?":
+    "마지막 화면의 'Made by us, with love'를 빠르게\n다섯 번 눌러보세요!\n개발자들이라면 이해할 수 있을지도??💧🔥",
 };
 
 export default function FloatingBot() {
@@ -21,7 +23,7 @@ export default function FloatingBot() {
     {
       id: 1,
       type: "bot",
-      text: "반가워요! 저는 두 사람의 이야기가 담긴 무지개봇이에요 🌈 형식적인 정보는 없지만, 두 사람의 TMI를 알려드릴 수 있어요! 궁금한 질문을 선택해보세요.",
+      text: "반가워요! 두 사람의 이야기를 전하는 무지개봇이에요 🌈\n궁금한 질문을 골라보세요.",
     },
   ]);
 
@@ -251,8 +253,11 @@ export default function FloatingBot() {
                 <p className="text-[10.5px] text-stone-500 font-medium tracking-wide">
                   궁금한 질문을 선택해보세요
                 </p>
-                <span className="text-[10px] text-stone-400 font-mono">
-                  드래그/스와이프 👈
+                <span className="flex items-center gap-1 text-[10px] text-stone-400">
+                  <span>옆으로 밀어보기</span>
+                  <span aria-hidden="true" className="text-rose-300">
+                    →
+                  </span>
                 </span>
               </div>
 
