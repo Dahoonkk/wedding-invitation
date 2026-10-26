@@ -15,6 +15,7 @@ import FloatingBot from "./components/FloatingBot";
 import MusicPlayer from "./components/MusicPlayer";
 import BackgroundAura from "./components/BackgroundAura"; // 추가
 import Gallery2 from "./components/EditorialGallery";
+import LoveTerminal from "./components/LoveTerminal";
 
 type Stage = "loading" | "cinematic" | "main";
 
@@ -63,6 +64,8 @@ function App() {
           </div>
         </div>
       )}
+
+      <LoveTerminal />
 
       <style>{`
         @keyframes fadeIn {
