@@ -3,12 +3,6 @@
 물과 불이 만나 무지개를 이루는 순간을 담은 모바일 웨딩 초대장입니다. 수채화처럼 번지는 색감과 은은한 글래스 UI로 두 사람의 이야기를 소개하고, 예식 정보를 편하게 확인할 수 있도록 만들었습니다.
 
 <p align="center">
-	<a href="https://dahoonkk.github.io/wedding-invitation/">
-		<img src="public/images/og-preview.jpg" alt="다훈과 은하의 웨딩 청첩장 미리보기" width="720" />
-	</a>
-</p>
-
-<p align="center">
 	<a href="https://dahoonkk.github.io/wedding-invitation/">💌 청첩장 열기</a>
 </p>
 
@@ -32,9 +26,10 @@
 - 지도와 교통 안내, 지도 앱 연결
 - 웨딩 사진 갤러리와 전체 화면 보기
 - 연락처 및 마음 전하기 안내
-- Firebase Firestore 방명록
+- Firebase Firestore 방명록과 네 가지 원소 선택
+- 물·불을 꾹 눌러 서로 드래그하면 무지개가 피어나는 방명록 인터랙션
 - 물·불 테마의 수채화 오라와 움직이는 파티클
-- 물·불 말풍선, 상단바 무지개 모드, 무지개봇 보너스 답변 등 숨겨진 이스터에그
+- 물·불 말풍선, 엘리멘탈 포인트 무지개 모드, 무지개봇 보너스 답변 등 이스터에그
 
 ## 기술 스택
 
@@ -100,7 +95,7 @@ src/
 └── lib/          # Firebase 및 공통 상수
 public/
 ├── icon/         # 파비콘 원본 이미지
-└── images/       # 청첩장 사진 및 공유 미리보기
+└── images/       # 청첩장 사진, 음악 커버 및 공유 미리보기
 ```
 
 ## 개인정보 및 보안
