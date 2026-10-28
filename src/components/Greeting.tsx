@@ -1,4 +1,46 @@
+import { useState } from "react";
+import confetti from "canvas-confetti";
+
 export default function Greeting() {
+  const [elementalStep, setElementalStep] = useState<
+    "idle" | "water" | "found"
+  >("idle");
+  const [elementalHint, setElementalHint] = useState("");
+
+  const handleElementTap = (element: "water" | "fire") => {
+    if (elementalStep === "found") return;
+
+    if (element === "water") {
+      setElementalStep("water");
+      setElementalHint(
+        "푸른 물빛이 반짝였어요. 이제 따뜻한 불빛을 만나게 해주세요.",
+      );
+      return;
+    }
+
+    if (elementalStep !== "water") {
+      setElementalHint("먼저 파란 말풍선을 눌러 물을 깨워보세요.");
+      return;
+    }
+
+    setElementalStep("found");
+    setElementalHint("두 원소가 만나 둘만의 무지개를 피워냈어요.");
+    window.dispatchEvent(new Event("wedding:rainbow-bloom"));
+
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      confetti({
+        particleCount: 48,
+        spread: 72,
+        startVelocity: 28,
+        gravity: 0.85,
+        ticks: 110,
+        origin: { x: 0.5, y: 0.58 },
+        colors: ["#38bdf8", "#22d3ee", "#fb7185", "#fb923c", "#fde68a"],
+        zIndex: 60,
+      });
+    }
+  };
+
   return (
     <section className="px-6 pt-28 pb-14 md:pt-24 md:pb-16">
       {/* 라벨 */}
@@ -11,9 +53,15 @@ export default function Greeting() {
 
       {/* 말풍선 */}
       <div className="space-y-4 mb-10 max-w-[400px] mx-auto">
-        {/* 오른쪽 - 물 */}
+        {/* 오른쪽 - 물 문구 */}
         <div className="flex justify-end">
-          <div className="relative mr-2 max-w-[84%] drop-shadow-[0_10px_16px_rgba(180,83,9,0.12)]">
+          <button
+            type="button"
+            onClick={() => handleElementTap("fire")}
+            aria-label="따뜻한 불빛 깨우기"
+            aria-pressed={elementalStep === "found"}
+            className={`relative mr-2 max-w-[84%] cursor-pointer border-0 bg-transparent p-0 text-left drop-shadow-[0_10px_16px_rgba(180,83,9,0.12)] transition-transform duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-4 ${elementalStep === "found" ? "scale-[1.025]" : ""}`}
+          >
             <span
               aria-hidden="true"
               className="absolute -right-[9px] top-[62%] z-0 h-6 w-5 -translate-y-1/2 bg-orange-50/90"
@@ -32,12 +80,20 @@ export default function Greeting() {
                 사람을 만났습니다
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
-        {/* 왼쪽 - 불 */}
+        {/* 왼쪽 - 불 문구 */}
         <div className="flex justify-start">
-          <div className="relative ml-2 max-w-[84%] drop-shadow-[0_10px_16px_rgba(3,105,161,0.12)]">
+          <button
+            type="button"
+            onClick={() => handleElementTap("water")}
+            aria-label="푸른 물빛 깨우기"
+            aria-pressed={
+              elementalStep === "water" || elementalStep === "found"
+            }
+            className={`relative ml-2 max-w-[84%] cursor-pointer border-0 bg-transparent p-0 text-left drop-shadow-[0_10px_16px_rgba(3,105,161,0.12)] transition-transform duration-300 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-4 ${elementalStep === "water" || elementalStep === "found" ? "scale-[1.025]" : ""}`}
+          >
             <span
               aria-hidden="true"
               className="absolute -left-[9px] top-[62%] z-0 h-6 w-5 -translate-y-1/2 bg-sky-50/90"
@@ -56,9 +112,20 @@ export default function Greeting() {
                 사람을 만났습니다
               </p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
+
+      {elementalHint && (
+        <p
+          aria-live="polite"
+          className={`mx-auto -mt-5 mb-8 max-w-[330px] text-center text-[12px] leading-relaxed transition-all duration-500 ${elementalStep === "found" ? "elemental-rainbow-reveal font-medium text-rose-600" : "text-stone-500"}`}
+        >
+          {elementalStep === "found" && <span aria-hidden="true">🌈 </span>}
+          {elementalHint}
+          {elementalStep === "found" && <span aria-hidden="true"> 💧🔥</span>}
+        </p>
+      )}
 
       {/* 구분선 */}
       <div className="flex items-center justify-center gap-3 mb-10">

@@ -12,14 +12,25 @@ const QA_DATA = {
   "💡 또 다른 TMI가 있어?":
     "사실 어머니들끼리 생일이 똑같아요!\n이런게 또 인연인거겠죠??",
   "🖥️ 숨겨진 이스터에그가 있어?":
-    "마지막 화면의 'Made by us, with love'를 빠르게\n다섯 번 눌러보세요!\n개발자들이라면 이해할 수 있을지도??💧🔥",
+    "마지막 화면의 'Made by us, with love'를 빠르게\n다섯 번 눌러보세요!\n개발자들이라면 이해할 수 있을지도?? 🔥🔥\n그 외의 숨겨둔 기능들도 한 번 찾아보세요!",
+};
+
+const BONUS_QUESTION = "🎁 숨겨진 보너스 답변 열기";
+const BONUS_ANSWER =
+  "저희가 만나 저희만의 무지개를 만들었듯,\n오늘 이 초대장을 읽어주신 당신도\n저희 이야기를 완성해 주는 소중한 빛이에요.\n\n끝까지 함께해 주셔서 감사합니다.\n저희의 새로운 시작에 축하 한마디를 남겨주세요 💌";
+
+type ChatMessage = {
+  id: number;
+  type: "bot" | "user";
+  text: string;
+  isBonus?: boolean;
 };
 
 export default function FloatingBot() {
   const [open, setOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       type: "bot",
@@ -29,6 +40,7 @@ export default function FloatingBot() {
 
   const [isTyping, setIsTyping] = useState(false);
   const [askedQuestions, setAskedQuestions] = useState<string[]>([]);
+  const [bonusClaimed, setBonusClaimed] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const chipContainerRef = useRef<HTMLDivElement>(null);
@@ -79,6 +91,30 @@ export default function FloatingBot() {
         },
       ]);
     }, 800);
+  };
+
+  const handleBonusClick = () => {
+    if (dragDistanceRef.current > 5 || bonusClaimed) return;
+
+    setBonusClaimed(true);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), type: "user", text: BONUS_QUESTION },
+    ]);
+    setIsTyping(true);
+
+    window.setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          type: "bot",
+          text: BONUS_ANSWER,
+          isBonus: true,
+        },
+      ]);
+    }, 900);
   };
 
   const handleClose = () => {
@@ -231,7 +267,25 @@ export default function FloatingBot() {
                       }
                     `}
                   >
-                    {msg.text}
+                    {msg.isBonus ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200/80 bg-gradient-to-r from-amber-50 to-rose-50 px-2 py-1 text-[9px] font-semibold tracking-[0.12em] text-rose-600">
+                            ✨ SECRET BONUS · UNLOCKED
+                          </span>
+                          <span className="h-px flex-1 bg-gradient-to-r from-rose-200/70 to-transparent" />
+                        </div>
+                        <div className="space-y-3 text-[13px] leading-[1.8]">
+                          {msg.text.split("\n\n").map((paragraph, index) => (
+                            <p key={index} className="whitespace-pre-line">
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      msg.text
+                    )}
                   </div>
                 </div>
               ))}
@@ -251,7 +305,11 @@ export default function FloatingBot() {
             <div className="p-3.5 sm:p-4 border-t border-white/60 bg-white/65 backdrop-blur-md pb-7 sm:pb-6 shrink-0">
               <div className="flex items-center justify-between mb-2 px-0.5 select-none">
                 <p className="text-[10.5px] text-stone-500 font-medium tracking-wide">
-                  궁금한 질문을 선택해보세요
+                  {askedQuestions.length === Object.keys(QA_DATA).length
+                    ? bonusClaimed
+                      ? "보너스 답변까지 모두 확인했어요 ✨"
+                      : "모든 질문을 모았어요 · 보너스 답변이 열렸어요!"
+                    : "궁금한 질문을 선택해보세요"}
                 </p>
                 <span className="flex items-center gap-1 text-[10px] text-stone-400">
                   <span>옆으로 밀어보기</span>
@@ -291,6 +349,16 @@ export default function FloatingBot() {
                     </button>
                   );
                 })}
+                {askedQuestions.length === Object.keys(QA_DATA).length && (
+                  <button
+                    type="button"
+                    onClick={handleBonusClick}
+                    disabled={bonusClaimed}
+                    className={`shrink-0 rounded-full border px-4 py-2 text-[12px] font-semibold shadow-[0_4px_14px_rgba(244,114,182,0.12)] transition-all duration-300 ${bonusClaimed ? "border-amber-100 bg-amber-50/60 text-stone-400" : "border-amber-200 bg-gradient-to-r from-amber-50 via-rose-50 to-sky-50 text-rose-700 hover:shadow-[0_6px_18px_rgba(244,114,182,0.2)] active:scale-95"}`}
+                  >
+                    {bonusClaimed ? "✨ 보너스 확인 완료" : BONUS_QUESTION}
+                  </button>
+                )}
               </div>
             </div>
           </div>
