@@ -354,9 +354,17 @@ export default function FloatingBot() {
                     type="button"
                     onClick={handleBonusClick}
                     disabled={bonusClaimed}
-                    className={`shrink-0 rounded-full border px-4 py-2 text-[12px] font-semibold shadow-[0_4px_14px_rgba(244,114,182,0.12)] transition-all duration-300 ${bonusClaimed ? "border-amber-100 bg-amber-50/60 text-stone-400" : "border-amber-200 bg-gradient-to-r from-amber-50 via-rose-50 to-sky-50 text-rose-700 hover:shadow-[0_6px_18px_rgba(244,114,182,0.2)] active:scale-95"}`}
+                    className={`relative isolate inline-flex shrink-0 items-center overflow-hidden rounded-full border px-4 py-2 text-[12px] font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70 ${bonusClaimed ? "border-amber-100 bg-amber-50/70 text-stone-400" : "border-rose-200/80 bg-white/90 text-rose-700 shadow-[0_3px_12px_rgba(244,114,182,0.1)] hover:shadow-[0_5px_16px_rgba(244,114,182,0.16)] active:scale-95"}`}
                   >
-                    {bonusClaimed ? "✨ 보너스 확인 완료" : BONUS_QUESTION}
+                    {!bonusClaimed && (
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-r from-amber-100/55 via-rose-100/55 to-sky-100/55"
+                      />
+                    )}
+                    <span className="relative z-10">
+                      {bonusClaimed ? "✨ 보너스 확인 완료" : BONUS_QUESTION}
+                    </span>
                   </button>
                 )}
               </div>

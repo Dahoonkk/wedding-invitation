@@ -121,9 +121,9 @@ export default function Greeting() {
           aria-live="polite"
           className={`mx-auto -mt-5 mb-8 max-w-[330px] text-center text-[12px] leading-relaxed transition-all duration-500 ${elementalStep === "found" ? "elemental-rainbow-reveal font-medium text-rose-600" : "text-stone-500"}`}
         >
-          {elementalStep === "found" && <span aria-hidden="true">🌈 </span>}
+          {elementalStep === "found" && <span aria-hidden="true">💧🔥 </span>}
           {elementalHint}
-          {elementalStep === "found" && <span aria-hidden="true"> 💧🔥</span>}
+          {elementalStep === "found" && <span aria-hidden="true"> 🌈</span>}
         </p>
       )}
 
