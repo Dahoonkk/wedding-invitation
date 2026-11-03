@@ -39,7 +39,7 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
           }`}
         >
           <img
-            src={`${import.meta.env.BASE_URL}images/1.png`}
+            src={`${import.meta.env.BASE_URL}images/10.jpeg`}
             alt="Main Cover"
             className="w-full h-full object-cover object-center"
           />

@@ -71,7 +71,7 @@ export default function Gallery() {
     <section className="px-5 py-12 overflow-hidden">
       {/* 라벨 (기존 유지) */}
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           GALLERY
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />

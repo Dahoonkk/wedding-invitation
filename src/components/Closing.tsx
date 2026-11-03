@@ -76,8 +76,12 @@ export default function Closing() {
   const [copied, setCopied] = useState(false);
   const [showManualCopy, setShowManualCopy] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [showSpecialImage, setShowSpecialImage] = useState(false);
 
   const lastBurstRef = useRef(0);
+  const likeTapCountRef = useRef(0);
+  const likeTapResetTimerRef = useRef<number | null>(null);
+  const specialImageTimerRef = useRef<number | null>(null);
   const pendingRef = useRef(0);
   const flushTimerRef = useRef<number | null>(null);
   const lastFlushAtRef = useRef(0);
@@ -189,6 +193,18 @@ export default function Closing() {
     };
   }, []);
 
+  useEffect(
+    () => () => {
+      if (likeTapResetTimerRef.current) {
+        window.clearTimeout(likeTapResetTimerRef.current);
+      }
+      if (specialImageTimerRef.current) {
+        window.clearTimeout(specialImageTimerRef.current);
+      }
+    },
+    [],
+  );
+
   const handleCopyLink = async () => {
     const success = await tryCopy(pageUrl);
 
@@ -258,6 +274,29 @@ export default function Closing() {
     setIsLiking(true);
     setTimeout(() => setIsLiking(false), 300);
 
+    likeTapCountRef.current += 1;
+    if (likeTapResetTimerRef.current) {
+      window.clearTimeout(likeTapResetTimerRef.current);
+    }
+
+    if (likeTapCountRef.current >= 5) {
+      likeTapCountRef.current = 0;
+      likeTapResetTimerRef.current = null;
+      setShowSpecialImage(true);
+      if (specialImageTimerRef.current) {
+        window.clearTimeout(specialImageTimerRef.current);
+      }
+      specialImageTimerRef.current = window.setTimeout(() => {
+        setShowSpecialImage(false);
+        specialImageTimerRef.current = null;
+      }, 4000);
+    } else {
+      likeTapResetTimerRef.current = window.setTimeout(() => {
+        likeTapCountRef.current = 0;
+        likeTapResetTimerRef.current = null;
+      }, 2500);
+    }
+
     // UI 즉시 +1
     setLikes((prev) => prev + 1);
     pendingRef.current += 1;
@@ -277,7 +316,7 @@ export default function Closing() {
       <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-sky-100/35 via-rose-50/20 to-transparent blur-3xl pointer-events-none" />
 
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           THANK YOU
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
@@ -288,13 +327,25 @@ export default function Closing() {
         <div className="relative rounded-[28px] overflow-hidden border border-white/80 shadow-[0_12px_36px_rgba(0,0,0,0.06)] aspect-[4/3] bg-white">
           <img
             src={`${import.meta.env.BASE_URL}images/no_gallery/23.png`}
-            alt="Together forever"
+            alt={showSpecialImage ? "" : "Together forever"}
+            aria-hidden={showSpecialImage}
             width={1575}
             height={2100}
             loading="lazy"
             decoding="async"
             sizes="(max-width: 380px) 100vw, 380px"
-            className="block w-full h-full object-cover object-center"
+            className={`block h-full w-full object-cover object-center transition-opacity duration-[1200ms] ease-in-out ${showSpecialImage ? "opacity-0" : "opacity-100"}`}
+          />
+          <img
+            src={`${import.meta.env.BASE_URL}images/no_gallery/last-disney.png`}
+            alt={showSpecialImage ? "Together forever special photo" : ""}
+            aria-hidden={!showSpecialImage}
+            width={1575}
+            height={2100}
+            loading="lazy"
+            decoding="async"
+            sizes="(max-width: 380px) 100vw, 380px"
+            className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-[1200ms] ease-in-out ${showSpecialImage ? "scale-100 opacity-100" : "scale-[1.02] opacity-0"}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
         </div>
@@ -317,7 +368,7 @@ export default function Closing() {
             type="button"
             onClick={handleCreatorMarkTap}
             aria-label="숨겨진 개발자 이스터에그 열기"
-            className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"
+            className="rounded-sm text-[10px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"
           >
             Made by us, with love
           </button>

@@ -138,7 +138,7 @@ export default function MusicPlayer() {
                 Steal The Show
               </span>
               <span className="text-[9px] text-stone-400">·</span>
-              <span className="shrink-0 text-[9px] text-stone-500">Lauv</span>
+              <span className="shrink-0 text-[10px] text-stone-500">Lauv</span>
             </div>
           </div>
         </div>

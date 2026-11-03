@@ -86,7 +86,7 @@ export default function Gallery() {
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16 overflow-hidden">
       {/* 라벨 */}
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           GALLERY
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
@@ -245,9 +245,7 @@ export default function Gallery() {
                   <button
                     key={index}
                     onClick={() => setLightboxIndex(index)}
-                    className="aspect-[3/4] rounded-2xl overflow-hidden border border-white/40 relative
-                               shadow-sm opacity-0 animate-[fadeUp_0.4s_ease-out_forwards]
-                               active:scale-[0.98] transition"
+                    className={`${index === 0 ? "col-span-2 aspect-[4/3]" : "aspect-[3/4]"} relative overflow-hidden rounded-2xl border border-white/40 shadow-sm opacity-0 animate-[fadeUp_0.4s_ease-out_forwards] transition active:scale-[0.98]`}
                     style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
                   >
                     <img

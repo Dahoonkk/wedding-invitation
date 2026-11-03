@@ -57,6 +57,10 @@ function AccountRow({
   const numberRef = useRef<HTMLParagraphElement>(null);
 
   const cleanNumber = number.replace(/-/g, "");
+  const holderName = holder.replace(
+    /^(?:신랑|신부)(?:\s+(?:아버지|어머니))?\s+/,
+    "",
+  );
 
   const handleCopy = async () => {
     const success = await tryCopy(cleanNumber);
@@ -100,7 +104,8 @@ function AccountRow({
           </p>
 
           <p className="mt-1 text-[13px] text-stone-600">
-            예금주 <span className="font-medium text-stone-800">{holder}</span>
+            예금주{" "}
+            <span className="font-bold text-stone-800">{holderName}</span>
           </p>
         </div>
 
@@ -232,7 +237,7 @@ export default function Account() {
   return (
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           WARM HEARTS
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />

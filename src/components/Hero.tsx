@@ -74,9 +74,9 @@ export default function Hero() {
   return (
     <section className="relative">
       {/* 메인 커버 */}
-      <div className="relative w-full h-[58vh] min-h-[320px] max-h-[480px] overflow-hidden">
+      <div className="relative w-full h-[58vh] min-h-[320px] max-h-[480px] overflow-hidden rounded-b-2xl">
         <img
-          src={`${import.meta.env.BASE_URL}images/1.png`}
+          src={`${import.meta.env.BASE_URL}images/10.jpeg`}
           alt="Main Cover"
           className="w-full h-full object-cover object-center scale-105 transform-gpu animate-[slowZoom_18s_ease-out_forwards]"
         />

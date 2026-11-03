@@ -16,6 +16,7 @@ interface Message {
   name: string;
   content: string;
   createdAt: any;
+  passwordNum?: string;
   passwordHash?: string;
   element?: ElementSelection;
 }
@@ -68,7 +69,7 @@ const RAINBOW_META = {
   emoji: "🌈",
   bg: "from-rose-100/90 via-amber-50/90 to-sky-100/90",
   ring: "border-transparent",
-  soft: "bg-gradient-to-r from-rose-50/75 via-amber-50/75 to-sky-50/75 border-violet-100/70 text-violet-950",
+  soft: "bg-gradient-to-r from-rose-50/75 via-amber-50/75 to-sky-50/75 border-violet-100/70 text-stone-800",
 };
 
 const LEGACY_EMOJI_META = [
@@ -107,26 +108,20 @@ function getEmojiMeta(id: string, element?: ElementSelection) {
 function formatDate(createdAt: any) {
   if (!createdAt?.toDate) return "";
   try {
-    return createdAt.toDate().toLocaleDateString("ko-KR", {
+    return createdAt.toDate().toLocaleString("ko-KR", {
       month: "short",
       day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
     });
   } catch {
     return "";
   }
 }
 
-async function hashPin(pin: string): Promise<string> {
+function legacyPinHash(pin: string): string {
   const text = `wedding-guestbook:${pin}`;
-
-  if (typeof crypto !== "undefined" && crypto.subtle) {
-    const data = new TextEncoder().encode(text);
-    const buf = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(buf))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-  }
-
   let hash = 5381;
   for (let i = 0; i < text.length; i++) {
     hash = (hash * 33) ^ text.charCodeAt(i);
@@ -140,6 +135,30 @@ async function hashPin(pin: string): Promise<string> {
   return out;
 }
 
+async function hashPin(pin: string): Promise<string> {
+  const text = `wedding-guestbook:${pin}`;
+
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    const data = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  return legacyPinHash(pin);
+}
+
+async function verifyPin(pin: string, storedHash: string): Promise<boolean> {
+  if (legacyPinHash(pin) === storedHash) return true;
+
+  try {
+    return (await hashPin(pin)) === storedHash;
+  } catch {
+    return false;
+  }
+}
+
 export default function Guestbook() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -150,11 +169,13 @@ export default function Guestbook() {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [password, setPassword] = useState("");
+  const formScrollRef = useRef<HTMLDivElement>(null);
   const [selectedElement, setSelectedElement] =
     useState<ElementSelection | null>(null);
   const [elementHint, setElementHint] = useState("");
   const [loading, setLoading] = useState(false);
   const elementPointerRef = useRef<ElementType | null>(null);
+  const elementHoverTargetRef = useRef<ElementType | null>(null);
   const elementHintTimerRef = useRef<number | null>(null);
   const elementLongPressRef = useRef(false);
   const suppressElementClickRef = useRef(false);
@@ -187,8 +208,42 @@ export default function Guestbook() {
     };
   }, [showAll, showSheet, deleteTarget]);
 
+  useEffect(() => {
+    if (!showSheet || password.length !== 4) return;
+
+    const scrollContainer = formScrollRef.current;
+    if (!scrollContainer) return;
+
+    const visualViewport = window.visualViewport;
+    const keyboardIsOpen =
+      visualViewport && window.innerHeight - visualViewport.height > 120;
+    const passwordInput = document.getElementById("guestbook-password");
+    if (
+      keyboardIsOpen &&
+      passwordInput &&
+      document.activeElement === passwordInput
+    ) {
+      passwordInput.blur();
+    }
+
+    let scrollTimeout = 0;
+    const animationFrame = window.requestAnimationFrame(() => {
+      scrollTimeout = window.setTimeout(() => {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 250);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(scrollTimeout);
+    };
+  }, [password, showSheet]);
+
   // 미리보기 5개
-  const previewMessages = messages.slice(0, 5);
+  const previewMessages = messages.slice(0, 3);
 
   const selectElement = (element: ElementType) => {
     if (suppressElementClickRef.current) {
@@ -211,6 +266,7 @@ export default function Guestbook() {
     suppressElementClickRef.current = false;
     elementLongPressRef.current = false;
     elementPointerRef.current = element;
+    elementHoverTargetRef.current = element;
     if (elementHintTimerRef.current) {
       window.clearTimeout(elementHintTimerRef.current);
     }
@@ -223,6 +279,24 @@ export default function Guestbook() {
     }
   };
 
+  const trackElementPointer = (
+    event: React.PointerEvent<HTMLFieldSetElement>,
+  ) => {
+    if (!elementPointerRef.current) return;
+
+    const target = event.currentTarget.ownerDocument
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLButtonElement>("[data-element]")?.dataset.element;
+    if (
+      target === "water" ||
+      target === "fire" ||
+      target === "air" ||
+      target === "earth"
+    ) {
+      elementHoverTargetRef.current = target;
+    }
+  };
+
   const finishElementGesture = (
     event: React.PointerEvent<HTMLFieldSetElement>,
   ) => {
@@ -232,7 +306,9 @@ export default function Guestbook() {
     }
 
     const source = elementPointerRef.current;
+    const lastTarget = elementHoverTargetRef.current;
     elementPointerRef.current = null;
+    elementHoverTargetRef.current = null;
     if (source !== "water" && source !== "fire") return;
 
     // 물·불 조합은 길게 누른 뒤 실제로 드래그한 제스처에서만 허용합니다.
@@ -240,9 +316,11 @@ export default function Guestbook() {
 
     suppressElementClickRef.current = true;
 
-    const target = document
-      .elementFromPoint(event.clientX, event.clientY)
-      ?.closest<HTMLButtonElement>("[data-element]")?.dataset.element;
+    const target =
+      event.currentTarget.ownerDocument
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest<HTMLButtonElement>("[data-element]")?.dataset.element ??
+      lastTarget;
     const droppedOnOpposite =
       (source === "water" && target === "fire") ||
       (source === "fire" && target === "water");
@@ -259,6 +337,7 @@ export default function Guestbook() {
 
   const cancelElementGesture = () => {
     elementPointerRef.current = null;
+    elementHoverTargetRef.current = null;
     elementLongPressRef.current = false;
     if (elementHintTimerRef.current) {
       window.clearTimeout(elementHintTimerRef.current);
@@ -307,12 +386,11 @@ export default function Guestbook() {
 
     setLoading(true);
     try {
-      const passwordHash = await hashPin(password);
       await addDoc(collection(db, "guestbook"), {
         name: name.trim(),
         content: content.trim(),
         element: selectedElement,
-        passwordHash,
+        passwordNum: password,
         createdAt: serverTimestamp(),
       });
       closeSheet();
@@ -347,14 +425,19 @@ export default function Guestbook() {
     setDeleteError("");
 
     try {
-      if (!deleteTarget.passwordHash) {
+      if (!deleteTarget.passwordNum && !deleteTarget.passwordHash) {
         setDeleteError("이 메시지는 비밀번호가 없어 삭제할 수 없습니다");
         setDeleteLoading(false);
         return;
       }
 
-      const inputHash = await hashPin(deletePin);
-      if (inputHash !== deleteTarget.passwordHash) {
+      const pinMatches = deleteTarget.passwordNum
+        ? deleteTarget.passwordNum === deletePin
+        : deleteTarget.passwordHash
+          ? await verifyPin(deletePin, deleteTarget.passwordHash)
+          : false;
+
+      if (!pinMatches) {
         setDeleteError("비밀번호가 올바르지 않습니다");
         setDeleteLoading(false);
         return;
@@ -417,7 +500,7 @@ export default function Guestbook() {
           <div
             className={`mx-3 mb-3 rounded-xl ${meta.soft} border px-3.5 py-3`}
           >
-            <p className="text-[14px] leading-[1.85] font-light">
+            <p className="whitespace-pre-line text-[14px] leading-[1.85] font-light">
               {msg.content}
             </p>
           </div>
@@ -429,7 +512,7 @@ export default function Guestbook() {
   return (
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           GUESTBOOK
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
@@ -600,7 +683,7 @@ export default function Guestbook() {
             onClick={closeSheet}
           />
           <div
-            className={`relative w-full max-w-[430px] flex flex-col
+            className={`relative flex h-auto max-h-[85dvh] w-full max-w-[430px] flex-col overflow-hidden
                         bg-white/85 backdrop-blur-2xl rounded-t-[32px] border-t border-x border-white/80
                         shadow-[0_-10px_40px_rgba(0,0,0,0.1)]
                         ${
@@ -626,7 +709,7 @@ export default function Guestbook() {
                   <h3 className="text-[15px] text-stone-800 font-medium tracking-wide">
                     축하 메시지 남기기
                   </h3>
-                  <p className="mt-1 text-[10px] font-light text-stone-400">
+                  <p className="mt-1 text-[11px] font-light text-stone-400">
                     원소를 고르고 마음을 남겨주세요
                   </p>
                 </div>
@@ -641,15 +724,19 @@ export default function Guestbook() {
               </div>
             </div>
 
-            <div className="p-5 pb-8">
+            <div
+              ref={formScrollRef}
+              className="max-h-[calc(85dvh-100px)] overflow-y-auto overscroll-contain p-5 pb-8"
+            >
               <form onSubmit={handleSubmit} className="space-y-3">
                 <fieldset
                   onPointerUp={finishElementGesture}
+                  onPointerMove={trackElementPointer}
                   onPointerCancel={cancelElementGesture}
                   onPointerLeave={cancelElementGesture}
                   className="rounded-2xl border border-white/90 bg-white/45 p-3"
                 >
-                  <legend className="px-1 text-[11px] font-semibold tracking-wide text-stone-700">
+                  <legend className="px-1 text-[12px] font-semibold tracking-wide text-stone-700">
                     여러분의 원소를 선택해주세요
                   </legend>
                   <div className="mt-1 grid grid-cols-4 gap-1.5">
@@ -704,7 +791,7 @@ export default function Guestbook() {
                           >
                             {meta.emoji}
                           </span>
-                          <span className="text-[10px] font-medium text-stone-700">
+                          <span className="text-[12px] font-medium text-stone-700">
                             {meta.label}
                           </span>
                         </button>
@@ -714,21 +801,26 @@ export default function Guestbook() {
                   {elementHint && selectedElement !== "rainbow" && (
                     <p
                       aria-live="polite"
-                      className="mt-2 whitespace-pre-line text-center text-[10px] leading-relaxed text-stone-600"
+                      className="mt-2 whitespace-pre-line text-center text-[12px] leading-relaxed text-stone-600"
                     >
                       {elementHint}
                     </p>
                   )}
                   {selectedElement === "rainbow" && (
                     <div className="elemental-rainbow-reveal mt-2 flex flex-col items-center gap-1 rounded-xl border border-violet-100/80 bg-gradient-to-r from-rose-100/70 via-amber-50/80 to-sky-100/70 px-3 py-2 text-center text-stone-800">
-                      <p className="flex items-center justify-center gap-1.5 text-[11px] font-semibold">
-                        <span aria-hidden="true">💧🔥</span>
-                        <span>두 원소가 만나 무지개가 피어났어요!</span>
-                        <span aria-hidden="true">🌈</span>
+                      <p className="text-balance text-center text-[10px] leading-snug font-semibold sm:text-[11px]">
+                        <span aria-hidden="true" className="mr-1">
+                          💧🔥
+                        </span>
+                        두 원소가 만나 무지개가 피어났어요!
+                        <span aria-hidden="true" className="ml-1">
+                          🌈
+                        </span>
                       </p>
-                      <p className="text-[10px] leading-relaxed text-stone-600">
-                        저희를 축하해주신 모든 분들의 앞날도 무지개처럼 환하게
-                        빛나길 축복해요.
+                      <p className="text-[11px] leading-relaxed text-stone-600">
+                        저희를 축하해주신 모든 분들의 앞날도
+                        <br />
+                        무지개처럼 환하게 빛나길 축복해요.
                       </p>
                     </div>
                   )}
@@ -809,7 +901,7 @@ export default function Guestbook() {
                     !selectedElement ||
                     password.length !== 4
                   }
-                  className="w-full rounded-xl bg-stone-800/90 py-3.5 text-[13px] font-medium text-white shadow-md transition active:scale-[0.99] disabled:opacity-50"
+                  className="w-full rounded-xl bg-rose-500 py-3.5 text-[13px] font-medium text-white shadow-md transition active:scale-[0.99] disabled:opacity-50"
                 >
                   {loading ? "등록 중..." : "메시지 등록하기"}
                 </button>

@@ -152,7 +152,7 @@ export default function Location() {
   return (
     <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
       <div className="flex flex-col items-center mb-8">
-        <p className="text-[11px] md:text-[12px] tracking-[0.28em] text-rose-400 font-bold">
+        <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           LOCATION
         </p>
         <span className="mt-2 w-6 h-px bg-rose-300/70" />
@@ -300,7 +300,7 @@ export default function Location() {
                         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100/80 text-[14px] leading-none">
                           {item.icon}
                         </span>
-                        <span className="text-[11px] font-semibold tracking-[0.14em] text-stone-600">
+                        <span className="text-[15px] font-semibold tracking-[0.1em] text-stone-700 md:text-[16px]">
                           {item.label}
                         </span>
                       </div>

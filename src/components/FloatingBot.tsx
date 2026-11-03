@@ -174,7 +174,7 @@ export default function FloatingBot() {
       >
         <span className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-300/30 via-rose-300/30 to-amber-300/30 animate-ping pointer-events-none" />
 
-        <span className="relative text-2xl z-10 group-hover:rotate-12 transition-transform">
+        <span className="relative z-10 inline-flex h-9 w-9 -translate-y-px items-center justify-center text-[27px] leading-none group-hover:rotate-12 transition-transform">
           🌈
         </span>
       </button>
@@ -221,7 +221,9 @@ export default function FloatingBot() {
                                 border border-white/90 shadow-sm
                                 flex items-center justify-center"
                   >
-                    <span className="text-base">🌈</span>
+                    <span className="inline-flex -translate-y-px items-center text-base leading-none">
+                      🌈
+                    </span>
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-stone-800 tracking-wide">

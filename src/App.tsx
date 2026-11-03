@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingScreen from "./components/LoadingScreen";
 import CinematicIntro from "./components/CinematicIntro";
 import TitleBar from "./components/TitleBar";
@@ -21,6 +21,31 @@ type Stage = "loading" | "cinematic" | "main";
 
 function App() {
   const [stage, setStage] = useState<Stage>("loading");
+
+  useEffect(() => {
+    const preventImageContextMenu = (event: MouseEvent) => {
+      if (event.target instanceof Element && event.target.closest("img")) {
+        event.preventDefault();
+      }
+    };
+    const preventImageDrag = (event: DragEvent) => {
+      if (event.target instanceof Element && event.target.closest("img")) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", preventImageContextMenu, true);
+    document.addEventListener("dragstart", preventImageDrag, true);
+
+    return () => {
+      document.removeEventListener(
+        "contextmenu",
+        preventImageContextMenu,
+        true,
+      );
+      document.removeEventListener("dragstart", preventImageDrag, true);
+    };
+  }, []);
 
   return (
     <>

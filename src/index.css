@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans:
+    "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.section-heading-label {
+  -webkit-text-stroke: 0.3px currentColor;
+}
+
 @keyframes handwriting-letter-appear {
   0% {
     filter: blur(3px);
@@ -189,8 +198,15 @@
   body {
     background-color: #ffffff;
     color: #44403c;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   html {
