@@ -28,7 +28,7 @@ export default function SubPhoto() {
         <p
           className="relative z-10 px-3 text-[24px] leading-[1.85] text-stone-700 whitespace-pre-line md:text-[27px]"
           style={{
-            fontFamily: "'Nanum Pen Script', cursive",
+            fontFamily: "var(--font-script-ko)",
             fontWeight: 500,
             WebkitFontSmoothing: "antialiased",
           }}
@@ -60,7 +60,7 @@ export default function SubPhoto() {
           <div className="h-[64px] flex items-center justify-center px-3">
             <p
               className="text-[19px] md:text-[21px] text-stone-600 text-center"
-              style={{ fontFamily: "'Nanum Pen Script', cursive" }}
+              style={{ fontFamily: "var(--font-script-ko)" }}
             >
               저희 결혼해요 ~ :)
             </p>

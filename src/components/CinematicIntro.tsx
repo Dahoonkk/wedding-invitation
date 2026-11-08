@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { WEDDING } from "../lib/constants";
 
 interface CinematicIntroProps {
   onComplete: () => void;
@@ -6,91 +7,115 @@ interface CinematicIntroProps {
 
 export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
   const [phase, setPhase] = useState<"fog" | "photo" | "text" | "exit">("fog");
+  const completedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setPhase("photo"), 450),
-      setTimeout(() => setPhase("text"), 1300),
-      setTimeout(() => setPhase("exit"), 4000),
-      setTimeout(() => onComplete(), 4700),
-    ];
-    return () => timers.forEach(clearTimeout);
+    onCompleteRef.current = onComplete;
   }, [onComplete]);
 
+  useEffect(() => {
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const photoDelay = reducedMotion ? 500 : 700;
+    const textDelay = reducedMotion ? 850 : 1650;
+    const exitDelay = reducedMotion ? 2000 : 4300;
+    const completeDelay = reducedMotion ? 2300 : 5000;
+    const timers = [
+      setTimeout(() => setPhase("photo"), photoDelay),
+      setTimeout(() => setPhase("text"), textDelay),
+      setTimeout(() => setPhase("exit"), exitDelay),
+      setTimeout(() => {
+        if (completedRef.current) return;
+        completedRef.current = true;
+        onCompleteRef.current();
+      }, completeDelay),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   const handleSkip = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
     onComplete();
   };
 
   return (
     <div
-      onClick={handleSkip}
-      className={`fixed inset-0 z-50 flex items-center justify-center cursor-pointer transition-opacity duration-700 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-700 motion-reduce:transition-none ${
         phase === "exit" ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
-      style={{
-        background: "linear-gradient(to bottom, #fff1f2, #f0f9ff, #fffbeb)",
-      }}
+      style={{ background: "#f5f2ed" }}
     >
-      <div className="relative w-full max-w-[430px] h-[100dvh] overflow-hidden bg-black">
+      <div className="relative h-dvh w-full max-w-107.5 overflow-hidden bg-[#f7f4ef]">
         {/* 사진 */}
         <div
-          className={`absolute inset-0 transition-all duration-1000 ease-out transform-gpu ${
+          className={`absolute inset-0 transform-gpu transition-all duration-1000 ease-out motion-reduce:transition-none ${
             phase === "fog" ? "opacity-0 scale-105" : "opacity-100 scale-100"
           }`}
         >
           <img
-            src={`${import.meta.env.BASE_URL}images/10.jpeg`}
-            alt="Main Cover"
+            src={`${import.meta.env.BASE_URL}images/2.jpeg`}
+            alt="다훈과 은하의 웨딩 사진"
             className="w-full h-full object-cover object-center"
           />
-          {/* 기본 오버레이 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-black/20" />
+          <div className="absolute inset-0 bg-linear-to-t from-stone-950/45 via-stone-900/10 to-stone-900/5" />
         </div>
 
-        {/* 다채로운 엘리멘탈 수채화 안개 레이어 */}
+        {/* 사진보다 먼저 나타나는 원형 오로라 안개 */}
         <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 transform-gpu overflow-hidden ${
+          aria-hidden="true"
+          className={`absolute inset-0 pointer-events-none transform-gpu overflow-hidden transition-opacity duration-1000 motion-reduce:transition-none ${
             phase === "fog" ? "opacity-100" : "opacity-0"
           }`}
         >
-          {/* 소프트 라이트 베이스 */}
-          <div className="absolute inset-0 bg-stone-100/40" />
+          <div className="absolute inset-0 bg-[#f8f5f0]/75" />
 
-          {/* 1. 불 & 원소 핑크 오라 (좌상단) */}
-          <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-rose-400/50 blur-3xl animate-pulse" />
+          <div className="intro-aurora absolute -left-20 -top-16 h-80 w-80 rounded-full bg-rose-300/35 blur-3xl" />
 
-          {/* 2. 물 & 신비 푸른 오라 (우하단) */}
-          <div
-            className="absolute -bottom-16 -right-16 w-80 h-80 rounded-full bg-sky-400/50 blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          />
+          <div className="intro-aurora intro-aurora--delayed absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-sky-300/35 blur-3xl" />
 
-          {/* 3. 빛 & 따뜻한 앰버 오라 (우상단) */}
-          <div className="absolute top-1/4 -right-12 w-64 h-64 rounded-full bg-amber-300/45 blur-3xl" />
+          <div className="intro-aurora absolute -right-12 top-1/4 h-64 w-64 rounded-full bg-amber-200/35 blur-3xl" />
 
-          {/* 4. 자연 & 생명 에메랄드 오라 (좌하단) */}
-          <div className="absolute bottom-1/4 -left-12 w-64 h-64 rounded-full bg-emerald-300/40 blur-3xl" />
+          <div className="intro-aurora intro-aurora--delayed absolute -left-12 bottom-1/4 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl" />
 
-          {/* 수채화 믹스 오버레이 (물감이 연하게 번진 느낌) */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-rose-200/40 via-sky-200/35 to-amber-100/45 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-linear-to-tr from-rose-100/25 via-sky-100/20 to-amber-50/35 mix-blend-multiply" />
 
-          {/* 중앙 부드러운 유백색 안개 필터 */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.4)_0%,rgba(255,255,255,0.85)_80%)] backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.36)_0%,rgba(255,255,255,0.76)_82%)] backdrop-blur-[2px]" />
         </div>
 
-        {/* 문구 등장 시 중앙 딤 (박스 없이) */}
+        {/* 문구 가독성을 위한 은은한 중앙 음영 */}
         <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-700 ${
+          aria-hidden="true"
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-700 motion-reduce:transition-none ${
             phase === "text" || phase === "exit" ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.15)_55%,transparent_75%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(49,39,35,0.32)_0%,rgba(49,39,35,0.12)_48%,transparent_78%)]" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSkip}
+          className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-white"
+          aria-label="화면을 누르면 인트로를 건너뛰고 청첩장을 엽니다"
+        />
+
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute bottom-[max(1.75rem,env(safe-area-inset-bottom))] left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border px-4 py-2 text-[11px] tracking-wide shadow-sm backdrop-blur-md transition-colors duration-500 motion-reduce:transition-none ${
+            phase === "fog"
+              ? "border-white/80 bg-white/65 text-stone-600"
+              : "border-white/30 bg-stone-950/30 text-white/95"
+          }`}
+        >
+          화면을 눌러 초대장 열기
         </div>
 
         {/* 문구 */}
         <div
-          className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-1000 transform-gpu ${
+          className={`absolute inset-0 flex items-center justify-center pointer-events-none transform-gpu transition-all duration-1000 motion-reduce:transition-none ${
             phase === "text"
               ? "opacity-100 translate-y-0"
               : phase === "exit"
@@ -99,31 +124,39 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
           }`}
         >
           <div className="relative z-10 px-6 text-center">
-            <p className="mb-3 text-[11px] tracking-[0.35em] text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-              DAHOON × EUNHA
+            <p className="mb-5 flex items-center justify-center gap-2 text-[15px] font-medium tracking-[0.2em]">
+              <span className="text-sky-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">
+                {WEDDING.groom.name}
+              </span>
+              <span
+                aria-hidden="true"
+                className="text-[12px] text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]"
+              >
+                ×
+              </span>
+              <span className="text-orange-100 drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">
+                {WEDDING.bride.name}
+              </span>
             </p>
 
             <h1
-              aria-label="We are getting Married"
-              className="intro-handwriting text-white text-[36px] md:text-[38px] leading-tight tracking-wide drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)]"
+              aria-label={`${WEDDING.groom.name}과 ${WEDDING.bride.name}의 결혼식`}
+              className={`intro-handwriting whitespace-nowrap text-[clamp(28px,8.5vw,38px)] leading-tight tracking-wide text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.7)] ${
+                phase === "text" ? "intro-title--active" : ""
+              }`}
               style={{ fontFamily: "'Great Vibes', cursive" }}
             >
-              {Array.from("We are getting Married").map((character, index) => (
-                <span
-                  key={`${character}-${index}`}
-                  aria-hidden="true"
-                  className={`intro-letter ${phase === "text" ? "intro-letter--active" : ""}`}
-                  style={{ animationDelay: `${index * 55}ms` }}
-                >
-                  {character === " " ? "\u00a0" : character}
-                </span>
-              ))}
+              We are getting Married
             </h1>
 
+            <p className="mt-3 text-[12px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
+              저희의 새로운 시작에 초대합니다
+            </p>
+
             <div className="mt-5 flex items-center justify-center gap-2">
-              <span className="w-8 h-px bg-gradient-to-r from-transparent to-sky-300/90" />
-              <span className="text-[10px] text-white/85">♥</span>
-              <span className="w-8 h-px bg-gradient-to-l from-transparent to-orange-300/90" />
+              <span className="h-px w-8 bg-linear-to-r from-transparent to-sky-300/90" />
+              <span className="text-[10px] text-rose-100/90">♥</span>
+              <span className="h-px w-8 bg-linear-to-l from-transparent to-orange-300/90" />
             </div>
           </div>
         </div>

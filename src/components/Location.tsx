@@ -232,14 +232,14 @@ export default function Location() {
               )}
 
               <div className="mt-5">
-                <p className="mb-2.5 px-1 text-[10px] font-semibold tracking-[0.2em] text-stone-400">
+                <p className="mb-2.5 px-1 text-[10px] font-bold tracking-[0.2em] text-stone-500">
                   OPEN IN MAPS
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={openKakaoMap}
                     className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
-                             border border-[#FEE500]/70 bg-[#FFFBE0]/80 px-2 text-[11px] font-semibold text-stone-700
+                             border border-[#FEE500]/70 bg-[#FFFBE0]/80 px-2 text-[11px] font-bold text-stone-700
                              shadow-[0_5px_16px_rgba(70,55,40,0.045)] active:scale-95 transition"
                   >
                     <KakaoIcon />
@@ -248,7 +248,7 @@ export default function Location() {
                   <button
                     onClick={openNaverMap}
                     className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
-                             border border-emerald-100 bg-emerald-50/60 px-2 text-[11px] font-medium text-stone-700
+                             border border-emerald-100 bg-emerald-50/60 px-2 text-[11px] font-bold text-stone-700
                              active:scale-95 transition"
                   >
                     <NaverIcon />
@@ -257,7 +257,7 @@ export default function Location() {
                   <button
                     onClick={openTMap}
                     className="flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-2xl
-                             border border-blue-100 bg-blue-50/60 px-2 text-[11px] font-medium text-stone-700
+                             border border-blue-100 bg-blue-50/60 px-2 text-[11px] font-bold text-stone-700
                              active:scale-95 transition"
                   >
                     <TmapIcon />

@@ -76,7 +76,7 @@ export default function Hero() {
       {/* 메인 커버 */}
       <div className="relative w-full h-[58vh] min-h-[320px] max-h-[480px] overflow-hidden rounded-b-2xl">
         <img
-          src={`${import.meta.env.BASE_URL}images/10.jpeg`}
+          src={`${import.meta.env.BASE_URL}images/2.jpeg`}
           alt="Main Cover"
           className="w-full h-full object-cover object-center scale-105 transform-gpu animate-[slowZoom_18s_ease-out_forwards]"
         />
@@ -99,7 +99,7 @@ export default function Hero() {
 
           <p
             className="mb-3 text-[23px] text-stone-700"
-            style={{ fontFamily: "'Great Vibes', cursive" }}
+            style={{ fontFamily: "var(--font-script-en)" }}
           >
             Our Beginning
           </p>
@@ -210,7 +210,7 @@ export default function Hero() {
               <div className="h-[68px] flex items-center justify-center px-3">
                 <p
                   className="text-[19px] text-stone-700 text-center"
-                  style={{ fontFamily: "'Nanum Pen Script', cursive" }}
+                  style={{ fontFamily: "var(--font-script-ko)" }}
                 >
                   웨딩 촬영 날 ♥
                 </p>

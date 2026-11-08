@@ -4,12 +4,19 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  getDocs,
+  limit,
   query,
   orderBy,
   onSnapshot,
+  startAfter,
   serverTimestamp,
+  type DocumentData,
+  type QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+
+const MESSAGE_PAGE_SIZE = 10;
 
 interface Message {
   id: string;
@@ -161,6 +168,13 @@ async function verifyPin(pin: string, storedHash: string): Promise<boolean> {
 
 export default function Guestbook() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState("");
+  const messageCursorRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(
+    null,
+  );
+  const olderPagesLoadedRef = useRef(false);
   const [showAll, setShowAll] = useState(false);
   const [allClosing, setAllClosing] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
@@ -186,16 +200,69 @@ export default function Guestbook() {
   const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "guestbook"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "guestbook"),
+      orderBy("createdAt", "desc"),
+      limit(MESSAGE_PAGE_SIZE),
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map((d) => ({
+      const page = snapshot.docs.map((d) => ({
         id: d.id,
         ...d.data(),
       })) as Message[];
-      setMessages(list);
+      const pageIds = new Set(page.map((message) => message.id));
+      setMessages((current) => [
+        ...page,
+        ...current.filter((message) => !pageIds.has(message.id)),
+      ]);
+
+      if (!olderPagesLoadedRef.current) {
+        messageCursorRef.current =
+          snapshot.docs[snapshot.docs.length - 1] ?? null;
+        setHasMoreMessages(snapshot.docs.length === MESSAGE_PAGE_SIZE);
+      }
     });
     return () => unsubscribe();
   }, []);
+
+  const loadMoreMessages = async () => {
+    const cursor = messageCursorRef.current;
+    if (loadingMoreMessages || !hasMoreMessages || !cursor) return;
+
+    setLoadingMoreMessages(true);
+    setLoadMoreError("");
+    olderPagesLoadedRef.current = true;
+
+    try {
+      const nextPage = await getDocs(
+        query(
+          collection(db, "guestbook"),
+          orderBy("createdAt", "desc"),
+          startAfter(cursor),
+          limit(MESSAGE_PAGE_SIZE),
+        ),
+      );
+      const pageMessages = nextPage.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as Message[];
+      setMessages((current) => {
+        const currentIds = new Set(current.map((message) => message.id));
+        return [
+          ...current,
+          ...pageMessages.filter((message) => !currentIds.has(message.id)),
+        ];
+      });
+      messageCursorRef.current =
+        nextPage.docs[nextPage.docs.length - 1] ?? cursor;
+      setHasMoreMessages(nextPage.docs.length === MESSAGE_PAGE_SIZE);
+    } catch (error) {
+      console.error("[guestbook] load more failed:", error);
+      setLoadMoreError("메시지를 불러오지 못했어요. 다시 시도해주세요.");
+    } finally {
+      setLoadingMoreMessages(false);
+    }
+  };
 
   useEffect(() => {
     if (showAll || showSheet || deleteTarget) {
@@ -444,6 +511,9 @@ export default function Guestbook() {
       }
 
       await deleteDoc(doc(db, "guestbook", deleteTarget.id));
+      setMessages((current) =>
+        current.filter((message) => message.id !== deleteTarget.id),
+      );
       closeDelete();
     } catch {
       setDeleteError("삭제에 실패했습니다");
@@ -527,7 +597,8 @@ export default function Guestbook() {
         </div>
         {messages.length > 0 && (
           <span className="rounded-full bg-white/70 px-2.5 py-1 text-[10px] text-stone-400 font-mono">
-            {messages.length}개의 메시지
+            불러온 {messages.length}
+            {hasMoreMessages ? "+" : ""}개
           </span>
         )}
       </div>
@@ -624,7 +695,9 @@ export default function Guestbook() {
                   </div>
                   <p className="text-[15px] text-stone-800 font-medium tracking-wide">
                     전체 메시지{" "}
-                    {messages.length > 0 ? `(${messages.length})` : ""}
+                    {messages.length > 0
+                      ? `(${messages.length}${hasMoreMessages ? "+" : ""})`
+                      : ""}
                   </p>
                 </div>
                 <button
@@ -653,6 +726,34 @@ export default function Guestbook() {
                     <MessageCard msg={msg} />
                   </div>
                 ))
+              )}
+              {messages.length > 0 && (
+                <div className="flex flex-col items-center gap-2 py-2">
+                  {hasMoreMessages ? (
+                    <button
+                      type="button"
+                      onClick={loadMoreMessages}
+                      disabled={loadingMoreMessages}
+                      className="rounded-full border border-rose-200/80 bg-white/80 px-5 py-2.5 text-[12px] font-medium text-rose-600 shadow-sm transition active:scale-95 disabled:opacity-60"
+                    >
+                      {loadingMoreMessages
+                        ? "불러오는 중..."
+                        : "이전 메시지 더 보기"}
+                    </button>
+                  ) : (
+                    <p className="text-[11px] text-stone-400">
+                      모든 메시지를 불러왔어요
+                    </p>
+                  )}
+                  {loadMoreError && (
+                    <p
+                      role="alert"
+                      className="text-center text-[11px] text-rose-500"
+                    >
+                      {loadMoreError}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 

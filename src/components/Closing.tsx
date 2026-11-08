@@ -337,7 +337,7 @@ export default function Closing() {
             className={`block h-full w-full object-cover object-center transition-opacity duration-[1200ms] ease-in-out ${showSpecialImage ? "opacity-0" : "opacity-100"}`}
           />
           <img
-            src={`${import.meta.env.BASE_URL}images/no_gallery/last-disney.png`}
+            src={`${import.meta.env.BASE_URL}images/no_gallery/last_disney.png`}
             alt={showSpecialImage ? "Together forever special photo" : ""}
             aria-hidden={!showSpecialImage}
             width={1575}
@@ -356,7 +356,7 @@ export default function Closing() {
           className="text-[30px] md:text-[34px] leading-tight
                      bg-clip-text text-transparent
                      bg-gradient-to-r from-sky-500 via-rose-400 to-orange-400 font-medium"
-          style={{ fontFamily: "'Great Vibes', cursive" }}
+          style={{ fontFamily: "var(--font-script-en)" }}
         >
           Together, forever.
         </p>
