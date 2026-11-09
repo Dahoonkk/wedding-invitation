@@ -135,6 +135,10 @@ export default function Hero() {
             {dateStr}
           </p>
 
+          <p className="mt-2.5 text-[13px] md:text-[14px] text-stone-500 tracking-wide">
+            {WEDDING.location.name}
+          </p>
+
           {/* D-DAY 라벨 */}
           <div className="mt-4 flex items-center justify-center gap-2.5">
             <span className="w-10 h-px bg-gradient-to-r from-transparent to-sky-300/80" />

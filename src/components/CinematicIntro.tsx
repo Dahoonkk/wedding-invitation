@@ -99,18 +99,21 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
           type="button"
           onClick={handleSkip}
           className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-white"
-          aria-label="화면을 누르면 인트로를 건너뛰고 청첩장을 엽니다"
+          aria-label="화면을 누르면 인트로를 건너뜁니다"
         />
 
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute bottom-[max(1.75rem,env(safe-area-inset-bottom))] left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border px-4 py-2 text-[11px] tracking-wide shadow-sm backdrop-blur-md transition-colors duration-500 motion-reduce:transition-none ${
+          className={`pointer-events-none absolute right-5 top-[max(1.25rem,env(safe-area-inset-top))] z-20 px-1 py-2 text-[11px] tracking-[0.12em] transition-colors duration-500 motion-reduce:transition-none ${
             phase === "fog"
-              ? "border-white/80 bg-white/65 text-stone-600"
-              : "border-white/30 bg-stone-950/30 text-white/95"
+              ? "text-stone-700/80"
+              : "text-white/90 [text-shadow:0_1px_8px_rgba(0,0,0,0.55)]"
           }`}
         >
-          화면을 눌러 초대장 열기
+          <span>탭하여 건너뛰기</span>
+          <span aria-hidden="true" className="ml-1 text-[13px]">
+            ›
+          </span>
         </div>
 
         {/* 문구 */}
@@ -141,12 +144,24 @@ export default function CinematicIntro({ onComplete }: CinematicIntroProps) {
 
             <h1
               aria-label={`${WEDDING.groom.name}과 ${WEDDING.bride.name}의 결혼식`}
-              className={`intro-handwriting whitespace-nowrap text-[clamp(28px,8.5vw,38px)] leading-tight tracking-wide text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.7)] ${
-                phase === "text" ? "intro-title--active" : ""
-              }`}
-              style={{ fontFamily: "'Great Vibes', cursive" }}
+              className="intro-handwriting whitespace-nowrap text-[clamp(28px,8.5vw,38px)] leading-tight tracking-wide text-white"
+              style={{
+                fontFamily: "'Great Vibes', cursive",
+                textShadow: "0 4px 20px rgba(0,0,0,0.7)",
+              }}
             >
-              We are getting Married
+              {Array.from("We are getting Married").map((character, index) => (
+                <span
+                  key={`${character}-${index}`}
+                  aria-hidden="true"
+                  className={`intro-letter ${
+                    phase === "text" ? "intro-letter--active" : ""
+                  }`}
+                  style={{ animationDelay: `${index * 45}ms` }}
+                >
+                  {character === " " ? "\u00a0" : character}
+                </span>
+              ))}
             </h1>
 
             <p className="mt-3 text-[12px] tracking-[0.12em] text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">

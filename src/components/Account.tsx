@@ -86,7 +86,7 @@ function AccountRow({
   const copiedStyle =
     accent === "sky"
       ? "bg-sky-50/90 border-sky-200 text-sky-600 shadow-sm"
-      : "bg-rose-50/90 border-rose-200 text-rose-600 shadow-sm";
+      : "bg-orange-50/90 border-orange-200 text-orange-600 shadow-sm";
 
   return (
     <div className="py-3.5 border-b border-stone-200/40 last:border-0">

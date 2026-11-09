@@ -61,8 +61,8 @@ export const WEDDING = {
     bride: [
       { bank: "카카오뱅크", number: "3333-09-6101353", holder: "신부 홍은하" },
       {
-        bank: "신한은행",
-        number: "123-456-789012",
+        bank: "농협은행",
+        number: "457124-51-015012",
         holder: "신부 아버지 홍경찬",
       },
       {
