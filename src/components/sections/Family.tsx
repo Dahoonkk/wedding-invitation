@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 const cleanPhone = (phone?: string) => phone?.replace(/-/g, "") || "";
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 interface AccountItem {
   bank: string;

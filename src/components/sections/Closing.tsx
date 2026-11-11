@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { openLoveTerminal } from "./LoveTerminal";
+import { db } from "../../lib/firebase";
+import { WEDDING } from "../../lib/constants";
+import { kakaoJavaScriptKey, loadKakaoShare } from "../../lib/kakao";
+import { openLoveTerminal } from "../interactive/LoveTerminal";
 
 const baseColors = [
   "#38bdf8",
@@ -77,6 +79,8 @@ export default function Closing() {
   const [showManualCopy, setShowManualCopy] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [showSpecialImage, setShowSpecialImage] = useState(false);
+  const [shareReady, setShareReady] = useState(false);
+  const [shareError, setShareError] = useState("");
 
   const lastBurstRef = useRef(0);
   const likeTapCountRef = useRef(0);
@@ -89,6 +93,81 @@ export default function Closing() {
   const terminalResetTimerRef = useRef<number | null>(null);
 
   const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+
+  useEffect(() => {
+    if (!kakaoJavaScriptKey) return;
+    let active = true;
+    loadKakaoShare()
+      .then(() => {
+        if (active) setShareReady(true);
+      })
+      .catch(() => {
+        if (active)
+          setShareError(
+            "카카오톡 공유를 준비하지 못했어요. 버튼을 눌러 다시 시도하거나 링크를 복사해 주세요.",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleKakaoShare = () => {
+    if (!shareReady || !window.Kakao) {
+      setShareError("공유 기능을 준비하고 있어요. 잠시 후 다시 눌러주세요.");
+      loadKakaoShare()
+        .then(() => {
+          setShareReady(true);
+          setShareError("준비됐어요. 공유 버튼을 한 번 더 눌러주세요.");
+        })
+        .catch(() => {
+          setShareError(
+            "카카오톡 공유를 불러오지 못했어요. 링크 복사를 이용해 주세요.",
+          );
+        });
+      return;
+    }
+
+    const productionUrl = "https://dahoonkk.github.io/wedding-invitation/";
+    const invitationUrl = import.meta.env.DEV
+      ? new URL(import.meta.env.BASE_URL, window.location.origin).href
+      : productionUrl;
+    const link = { mobileWebUrl: invitationUrl, webUrl: invitationUrl };
+    const kakaoMapUrl = `${invitationUrl}?open=kakaomap`;
+    const locationLink = {
+      mobileWebUrl: kakaoMapUrl,
+      webUrl: kakaoMapUrl,
+    };
+    const dateLabel = new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      dateStyle: "full",
+      timeStyle: "short",
+    }).format(new Date(`${WEDDING.date}+09:00`));
+
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title: `${WEDDING.groom.name} ♥ ${WEDDING.bride.name} 결혼합니다`,
+          description: `${dateLabel}\n${WEDDING.location.name}`,
+          imageUrl: `${productionUrl}images/2.jpeg`,
+          imageWidth: 1500,
+          imageHeight: 2100,
+          link,
+        },
+        buttons: [
+          { title: "청첩장 보기", link },
+          { title: "위치 보기", link: locationLink },
+        ],
+      });
+      setShareError("");
+    } catch (error) {
+      console.error("[kakao share] failed:", error);
+      setShareError(
+        "카카오톡 공유를 열지 못했어요. 링크 복사를 이용해 주세요.",
+      );
+    }
+  };
 
   const handleCreatorMarkTap = () => {
     terminalTapCountRef.current += 1;
@@ -382,43 +461,103 @@ export default function Closing() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 mb-3">
+      <div
+        className={`mb-3 grid w-full max-w-95 gap-2.5 sm:gap-3 ${
+          kakaoJavaScriptKey ? "grid-cols-3" : "grid-cols-2"
+        }`}
+      >
+        {kakaoJavaScriptKey && (
+          <button
+            type="button"
+            onClick={handleKakaoShare}
+            aria-label="카카오톡으로 청첩장 공유하기"
+            className="flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border border-amber-100/80 bg-amber-50/70 px-1 py-2 text-stone-700 shadow-[0_4px_16px_rgba(87,65,48,0.04)] transition hover:bg-amber-50 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5 text-amber-700/80"
+              fill="currentColor"
+            >
+              <path d="M12 3.5c-5.3 0-9.5 3.4-9.5 7.6 0 2.7 1.8 5 4.5 6.4l-.9 3.3a.45.45 0 0 0 .66.5l4-2.4c.4.05.82.08 1.24.08 5.3 0 9.5-3.4 9.5-7.6S17.3 3.5 12 3.5Z" />
+            </svg>
+            <span className="whitespace-nowrap text-[11px] font-medium tracking-wide sm:text-[12px]">
+              카카오톡 공유
+            </span>
+          </button>
+        )}
         <button
+          type="button"
           onClick={handleCopyLink}
-          className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5
-                      text-[12px] tracking-wide font-medium
-                      backdrop-blur-xl border transition-all duration-300
+          aria-label={copied ? "청첩장 링크 복사 완료" : "청첩장 링크 복사"}
+          className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border px-1 py-2
+                      shadow-[0_4px_16px_rgba(87,65,48,0.04)] transition duration-300 active:scale-95
+                      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300
                       ${
                         copied
-                          ? "bg-rose-50/90 border-rose-200/80 text-rose-600 shadow-sm"
-                          : "bg-white/70 border-white/90 text-stone-700 shadow-sm active:scale-95"
+                          ? "border-rose-200/80 bg-rose-50/80 text-rose-600"
+                          : "border-white/90 bg-white/70 text-stone-700 hover:bg-white/90"
                       }`}
         >
-          <span className="text-sm">{copied ? "✓" : "🔗"}</span>
-          <span>{copied ? "링크 복사 완료" : "청첩장 링크 복사"}</span>
+          {copied ? (
+            <span
+              aria-hidden="true"
+              className="flex h-5 w-5 items-center justify-center text-base text-rose-500"
+            >
+              ✓
+            </span>
+          ) : (
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              className="h-5 w-5 text-stone-500"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M10 13.5a4 4 0 0 0 5.7 0l2.8-2.8a4 4 0 0 0-5.7-5.7l-1.6 1.6" />
+              <path d="M14 10.5a4 4 0 0 0-5.7 0l-2.8 2.8a4 4 0 0 0 5.7 5.7l1.6-1.6" />
+            </svg>
+          )}
+          <span className="whitespace-nowrap text-[11px] font-medium tracking-wide sm:text-[12px]">
+            {copied ? "복사 완료" : "링크 복사"}
+          </span>
         </button>
 
         <button
+          type="button"
           onClick={handleLike}
           aria-label={`좋아요 ${likes}개`}
-          className={`group inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full px-4
-                     bg-white/70 backdrop-blur-xl border border-white/90
-                     shadow-sm text-stone-700 active:scale-95 transition-all duration-300 ${
+          className={`group flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl border border-rose-100/80 bg-rose-50/50 px-1 py-2
+                     shadow-[0_4px_16px_rgba(87,65,48,0.04)] text-stone-700 transition duration-300 hover:bg-rose-50/80 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
                        isLiking ? "scale-105" : ""
                      }`}
         >
           <span
-            className={`text-base transition-transform duration-200 ${
+            aria-hidden="true"
+            className={`flex h-5 items-center justify-center text-[18px] leading-none text-rose-400 transition-transform duration-200 ${
               isLiking ? "scale-125 rotate-12" : "group-hover:scale-110"
             }`}
           >
-            ❤️
+            ♥
           </span>
-          <span className="text-[12px] font-medium tabular-nums font-mono min-w-[1.2rem]">
-            {likes}
+          <span className="max-w-full truncate text-[11px] font-medium tracking-wide tabular-nums sm:text-[12px]">
+            좋아요{" "}
+            <span className="text-rose-400">{likes.toLocaleString()}</span>
           </span>
         </button>
       </div>
+
+      {shareError && (
+        <p
+          role="status"
+          className="mb-3 px-3 text-center text-[12px] text-stone-600"
+        >
+          {shareError}
+        </p>
+      )}
 
       {showManualCopy && (
         <div className="w-full max-w-sm mt-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/90 px-4 py-3.5 text-center shadow-sm">

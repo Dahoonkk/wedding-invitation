@@ -1,26 +1,88 @@
 import { useEffect, useState } from "react";
-import LoadingScreen from "./components/LoadingScreen";
-import CinematicIntro from "./components/CinematicIntro";
-import TitleBar from "./components/TitleBar";
-import Hero from "./components/Hero";
-import SubPhoto from "./components/SubPhoto";
-import Greeting from "./components/Greeting";
-import Family from "./components/Family";
-import Calendar from "./components/Calendar";
-import Location from "./components/Location";
-import Account from "./components/Account";
-import Guestbook from "./components/Guestbook";
-import Closing from "./components/Closing";
-import FloatingBot from "./components/FloatingBot";
-import MusicPlayer from "./components/MusicPlayer";
-import BackgroundAura from "./components/BackgroundAura"; // 추가
-import Gallery2 from "./components/EditorialGallery";
-import LoveTerminal from "./components/LoveTerminal";
+import LoadingScreen from "./components/intro/LoadingScreen";
+import CinematicIntro from "./components/intro/CinematicIntro";
+import TitleBar from "./components/layout/TitleBar";
+import Hero from "./components/sections/Hero";
+import SubPhoto from "./components/sections/SubPhoto";
+import Greeting from "./components/sections/Greeting";
+import Family from "./components/sections/Family";
+import Calendar from "./components/sections/Calendar";
+import Location from "./components/sections/Location";
+import Account from "./components/sections/Account";
+import Guestbook from "./components/sections/Guestbook";
+import Closing from "./components/sections/Closing";
+import FloatingBot from "./components/interactive/FloatingBot";
+import MusicPlayer from "./components/interactive/MusicPlayer";
+import BackgroundAura from "./components/layout/BackgroundAura";
+import Gallery2 from "./components/gallery/EditorialGallery";
+import LoveTerminal from "./components/interactive/LoveTerminal";
+import { WEDDING } from "./lib/constants";
 
 type Stage = "loading" | "cinematic" | "main";
 
 function App() {
-  const [stage, setStage] = useState<Stage>("loading");
+  const isKakaoMapLink =
+    new URLSearchParams(window.location.search).get("open") === "kakaomap";
+  const [stage, setStage] = useState<Stage>(() =>
+    window.location.hash === "#location" ? "main" : "loading",
+  );
+
+  useEffect(() => {
+    if (!isKakaoMapLink) return;
+
+    const webUrl = `https://place.map.kakao.com/${WEDDING.location.kakaoPlaceId}`;
+    const appUrl = `kakaomap://place?id=${WEDDING.location.kakaoPlaceId}`;
+    let appOpened = false;
+    let fallbackTimeout: number | undefined;
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") appOpened = true;
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    const startTimeout = window.setTimeout(() => {
+      if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.location.replace(webUrl);
+        return;
+      }
+      try {
+        window.location.href = appUrl;
+      } catch {
+        window.location.replace(webUrl);
+        return;
+      }
+      fallbackTimeout = window.setTimeout(() => {
+        if (
+          !appOpened &&
+          document.visibilityState === "visible" &&
+          document.hasFocus()
+        ) {
+          window.location.replace(webUrl);
+        }
+      }, 2500);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(startTimeout);
+      if (fallbackTimeout) window.clearTimeout(fallbackTimeout);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [isKakaoMapLink]);
+
+  useEffect(() => {
+    if (stage !== "main") return;
+    const scrollToLocation = () => {
+      if (window.location.hash === "#location") {
+        document
+          .getElementById("location")
+          ?.scrollIntoView({ behavior: "instant" });
+      }
+    };
+    const frame = requestAnimationFrame(scrollToLocation);
+    window.addEventListener("hashchange", scrollToLocation);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", scrollToLocation);
+    };
+  }, [stage]);
 
   useEffect(() => {
     const preventImageContextMenu = (event: MouseEvent) => {
@@ -46,6 +108,40 @@ function App() {
       document.removeEventListener("dragstart", preventImageDrag, true);
     };
   }, []);
+
+  if (isKakaoMapLink) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[#faf9f7] px-6 text-center">
+        <div className="w-full max-w-sm rounded-3xl border border-white bg-white/80 px-6 py-10 shadow-sm">
+          <p className="text-[12px] font-semibold tracking-[0.2em] text-rose-400">
+            LOCATION
+          </p>
+          <h1 className="mt-4 text-lg font-medium text-stone-800">
+            카카오맵에서 위치 보기
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-stone-500">
+            카카오맵을 열고 있어요.
+            <br />
+            자동으로 열리지 않으면 아래에서 선택해 주세요.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <a
+              className="rounded-full bg-[#FEE500] px-5 py-3 text-sm font-medium text-[#3C1E1E]"
+              href={`kakaomap://place?id=${WEDDING.location.kakaoPlaceId}`}
+            >
+              카카오맵 앱 열기
+            </a>
+            <a
+              className="rounded-full border border-stone-200 bg-white px-5 py-3 text-sm text-stone-700"
+              href={`https://place.map.kakao.com/${WEDDING.location.kakaoPlaceId}`}
+            >
+              웹에서 위치 보기
+            </a>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>

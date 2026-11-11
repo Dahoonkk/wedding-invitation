@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { WEDDING } from "../lib/constants";
+import { useEffect, useRef, useState } from "react";
+import { WEDDING } from "../../lib/constants";
+import { kakaoJavaScriptKey, loadKakaoMaps } from "../../lib/kakao";
 
 async function tryCopy(text: string): Promise<boolean> {
   if (navigator.clipboard && window.isSecureContext) {
@@ -104,6 +105,116 @@ export default function Location() {
   const [copied, setCopied] = useState(false);
   const [showManualCopy, setShowManualCopy] = useState(false);
   const [showTMapFallback, setShowTMapFallback] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const [mapCoordinates, setMapCoordinates] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!kakaoJavaScriptKey) return;
+    let active = true;
+    let searchTimeout: number | undefined;
+    let markerObserver: IntersectionObserver | undefined;
+
+    loadKakaoMaps()
+      .then((maps) => {
+        if (!active) return;
+        const geocoder = new maps.services.Geocoder();
+        searchTimeout = window.setTimeout(() => {
+          if (active)
+            console.warn(
+              "[kakao maps] 주소 검색 시간이 초과되어 기존 지도를 표시합니다.",
+            );
+        }, 10000);
+        geocoder.addressSearch(
+          WEDDING.location.address,
+          (results, status) => {
+            if (searchTimeout) window.clearTimeout(searchTimeout);
+            if (
+              !active ||
+              status !== maps.services.Status.OK ||
+              !results[0] ||
+              !mapRef.current
+            )
+              return;
+            const latitude = Number(results[0].y);
+            const longitude = Number(results[0].x);
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude))
+              return;
+            try {
+              const position = new maps.LatLng(latitude, longitude);
+              const map = new maps.Map(mapRef.current, {
+                center: position,
+                level: 4,
+                draggable: false,
+                scrollwheel: false,
+              });
+              const marker = document.createElement("div");
+              marker.className = "wedding-map-marker";
+              marker.setAttribute("aria-hidden", "true");
+
+              const label = document.createElement("span");
+              label.className = "wedding-map-marker__label";
+              const venueName = document.createElement("span");
+              venueName.textContent = "은파팰리스";
+              const hallName = document.createElement("span");
+              hallName.className = "wedding-map-marker__hall";
+              hallName.textContent = "라끄베르홀";
+              label.append(venueName, hallName);
+
+              const pinWrap = document.createElement("span");
+              pinWrap.className = "wedding-map-marker__pin-wrap";
+              const pin = document.createElement("span");
+              pin.className = "wedding-map-marker__pin";
+              const heart = document.createElement("span");
+              heart.className = "wedding-map-marker__heart";
+              heart.textContent = "♥";
+              pin.append(heart);
+              pinWrap.append(pin);
+
+              marker.append(label, pinWrap);
+              new maps.CustomOverlay({
+                map,
+                position,
+                content: marker,
+                xAnchor: 0.5,
+                yAnchor: 1,
+              });
+              if ("IntersectionObserver" in window) {
+                markerObserver = new IntersectionObserver(
+                  (entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                      marker.classList.add("wedding-map-marker--visible");
+                      markerObserver?.disconnect();
+                    }
+                  },
+                  { threshold: 0.3 },
+                );
+                markerObserver.observe(mapRef.current);
+              } else {
+                marker.classList.add("wedding-map-marker--visible");
+              }
+              setMapCoordinates({ latitude, longitude });
+              setMapReady(true);
+            } catch (error) {
+              console.warn("[kakao maps] 기존 지도로 대체합니다.", error);
+            }
+          },
+          { analyze_type: "exact" },
+        );
+      })
+      .catch((error: unknown) => {
+        if (active) console.warn("[kakao maps] 기존 지도로 대체합니다.", error);
+      });
+
+    return () => {
+      active = false;
+      if (searchTimeout) window.clearTimeout(searchTimeout);
+      markerObserver?.disconnect();
+    };
+  }, []);
 
   const handleCopyAddress = async () => {
     const success = await tryCopy(WEDDING.location.address);
@@ -118,12 +229,10 @@ export default function Location() {
   };
 
   const openKakaoMap = () => {
-    window.open(
-      `https://map.kakao.com/link/search/${encodeURIComponent(
-        WEDDING.location.name2,
-      )}`,
-      "_blank",
-    );
+    const url = mapCoordinates
+      ? `https://map.kakao.com/link/to/${encodeURIComponent(WEDDING.location.name)},${mapCoordinates.latitude},${mapCoordinates.longitude}`
+      : `https://map.kakao.com/link/search/${encodeURIComponent(WEDDING.location.name2)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const openNaverMap = () => {
@@ -150,7 +259,10 @@ export default function Location() {
   )}`;
 
   return (
-    <section className="px-5 pt-28 pb-14 md:pt-24 md:pb-16">
+    <section
+      id="location"
+      className="scroll-mt-12 px-5 pt-28 pb-14 md:pt-24 md:pb-16"
+    >
       <div className="flex flex-col items-center mb-8">
         <p className="section-heading-label text-[12px] md:text-[13px] tracking-[0.28em] text-rose-400 font-extrabold">
           LOCATION
@@ -166,20 +278,27 @@ export default function Location() {
 
           {/* 지도 */}
           <div className="relative w-full aspect-[16/10] bg-stone-100 border-b border-stone-200/40">
-            <iframe
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                WEDDING.location.name,
-              )}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-full"
-              title="오시는 길"
+            {!mapReady && (
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                  WEDDING.location.name,
+                )}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full"
+                title="오시는 길"
+              />
+            )}
+            <div
+              ref={mapRef}
+              role="img"
+              aria-label={`${WEDDING.location.name} 위치 지도`}
+              className={`absolute inset-0 h-full w-full ${mapReady ? "visible" : "invisible"}`}
             />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white/20 to-transparent" />
           </div>
 
           <div className="p-5 md:p-6">

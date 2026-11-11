@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 export default function Hero() {
   const [visible, setVisible] = useState(false);

@@ -1,4 +1,4 @@
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 export default function Calendar() {
   const weddingDate = new Date(WEDDING.date);

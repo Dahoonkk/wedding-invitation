@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type TouchEvent } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 export default function Gallery() {
   const images = WEDDING.gallery;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AURA_ITEMS } from "../data/auraItems";
+import { AURA_ITEMS } from "../../data/auraItems";
 
 export default function BackgroundAura() {
   const containerRef = useRef<HTMLDivElement>(null);

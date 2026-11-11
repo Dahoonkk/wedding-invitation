@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 interface CinematicIntroProps {
   onComplete: () => void;

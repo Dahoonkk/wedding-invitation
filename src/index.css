@@ -14,6 +14,95 @@
   -webkit-text-stroke: 0.3px currentColor;
 }
 
+.wedding-map-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.wedding-map-marker__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 13px;
+  border: 1px solid rgb(255 255 255 / 90%);
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 3px 14px rgb(68 46 46 / 24%);
+  color: #44403c;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
+.wedding-map-marker__hall {
+  color: #78716c;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.wedding-map-marker__pin-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+}
+
+.wedding-map-marker__pin-wrap::before {
+  position: absolute;
+  inset: -5px;
+  border: 2px solid rgb(251 113 133 / 55%);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wedding-map-marker--visible .wedding-map-marker__pin-wrap::before {
+  animation: wedding-map-marker-ripple 1.4s ease-out 1;
+}
+
+@keyframes wedding-map-marker-ripple {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.65);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+.wedding-map-marker__pin {
+  position: relative;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  border-radius: 50% 50% 50% 0;
+  background: linear-gradient(135deg, #38bdf8, #fb7185 55%, #fb923c);
+  box-shadow: 0 4px 12px rgb(87 57 57 / 32%);
+  color: white;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  transform: rotate(-45deg);
+}
+
+.wedding-map-marker__heart {
+  transform: rotate(45deg);
+}
+
 @keyframes intro-letter-appear {
   0% {
     filter: blur(2px);
@@ -184,6 +273,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .wedding-map-marker--visible .wedding-map-marker__pin-wrap::before {
+    animation: none;
+  }
+
   .intro-aurora {
     animation: none;
   }

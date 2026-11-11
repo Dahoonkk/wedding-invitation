@@ -14,7 +14,7 @@ import {
   type DocumentData,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../../lib/firebase";
 
 const MESSAGE_PAGE_SIZE = 10;
 
@@ -341,7 +341,7 @@ export default function Guestbook() {
     if (element === "water" || element === "fire") {
       elementHintTimerRef.current = window.setTimeout(() => {
         elementLongPressRef.current = true;
-        setElementHint("좋아요! 손을 떼지 말고 반대편 원소로 드래그하세요.");
+        setElementHint("좋아요! 손을 떼지 말고 드래그해보세요.");
       }, 520);
     }
   };

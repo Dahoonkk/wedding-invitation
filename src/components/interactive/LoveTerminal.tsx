@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { WEDDING } from "../lib/constants";
+import { WEDDING } from "../../lib/constants";
 
 const TERMINAL_EVENT = "wedding:open-terminal";
 
