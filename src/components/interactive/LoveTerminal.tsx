@@ -22,7 +22,7 @@ function getScheduleText() {
   const [year, month, day] = date.split("-");
   const [hourText, minute = "00"] = time.split(":");
   const hour = Number(hourText);
-  const period = hour >= 12 ? "오후" : "오전";
+  const period = hour >= 12 ? "낮" : "오전";
   const displayHour = hour % 12 || 12;
   const weekday = new Date(`${date}T12:00:00+09:00`).toLocaleDateString(
     "ko-KR",

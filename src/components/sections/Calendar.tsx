@@ -10,10 +10,10 @@ export default function Calendar() {
 
   const hours = weddingDate.getHours();
   const minutes = weddingDate.getMinutes();
-  const ampm = hours >= 12 ? "오후" : "오전";
+  const timePeriod = hours >= 12 ? "낮" : "오전";
   const displayHour = hours % 12 || 12;
   const displayMinute = String(minutes).padStart(2, "0");
-  const formattedTime = `${ampm} ${displayHour}:${displayMinute}`;
+  const formattedTime = `${displayHour}:${displayMinute}`;
 
   const weekdaysKo = ["일", "월", "화", "수", "목", "금", "토"];
   const weekdayLabel = weekdaysKo[weekday];
@@ -113,7 +113,10 @@ export default function Calendar() {
               </p>
 
               <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md border border-rose-200/70 px-4 py-1.5 shadow-[0_4px_14px_rgba(244,63,94,0.08)]">
-                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-sky-400 via-amber-400 to-rose-400" />
+                <span className="calendar-time-dot h-2 w-2 rounded-full" />
+                <span className="text-[15px] md:text-[16px] font-semibold text-stone-800 tracking-wide">
+                  {timePeriod}
+                </span>
                 <span className="text-[15px] md:text-[16px] font-semibold text-stone-800 tracking-wide">
                   {formattedTime}
                 </span>
@@ -156,7 +159,7 @@ export default function Calendar() {
                     className="flex justify-center items-center h-10"
                   >
                     {isWedding ? (
-                      <div className="calendar-wedding-day relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 via-amber-300 to-sky-400">
+                      <div className="calendar-wedding-day relative flex h-9 w-9 items-center justify-center rounded-full">
                         <span className="relative z-10 text-[14px] font-semibold text-white">
                           {date}
                         </span>
