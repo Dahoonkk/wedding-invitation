@@ -358,7 +358,7 @@ export default function Closing() {
       window.clearTimeout(likeTapResetTimerRef.current);
     }
 
-    if (likeTapCountRef.current >= 5) {
+    if (likeTapCountRef.current >= 2) {
       likeTapCountRef.current = 0;
       likeTapResetTimerRef.current = null;
       setShowSpecialImage(true);
