@@ -26,6 +26,7 @@ type ChatMessage = {
 export default function FloatingBot() {
   const [open, setOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -57,6 +58,31 @@ export default function FloatingBot() {
     }
     return () => {
       document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setShowScrollHint(false);
+      return;
+    }
+
+    let hideHintTimer: number | null = null;
+    const showHintWhileScrolling = () => {
+      setShowScrollHint(true);
+      if (hideHintTimer !== null) window.clearTimeout(hideHintTimer);
+      hideHintTimer = window.setTimeout(() => {
+        setShowScrollHint(false);
+        hideHintTimer = null;
+      }, 900);
+    };
+
+    window.addEventListener("scroll", showHintWhileScrolling, {
+      passive: true,
+    });
+    return () => {
+      window.removeEventListener("scroll", showHintWhileScrolling);
+      if (hideHintTimer !== null) window.clearTimeout(hideHintTimer);
     };
   }, [open]);
 
@@ -157,10 +183,10 @@ export default function FloatingBot() {
 
   return (
     <>
-      {/* 선명한 원형 아이콘 플로팅 버튼 (Q&A 텍스트 제거) */}
+      {/* 두 사람의 TMI를 확인할 수 있는 플로팅 챗봇 버튼 */}
       <button
         onClick={() => setOpen(true)}
-        aria-label="무지개봇 열기"
+        aria-label="저희의 TMI를 확인하는 무지개봇 열기"
         className="fixed bottom-6 right-5 z-40 group w-14 h-14 rounded-full
                    bg-white/90 backdrop-blur-2xl 
                    border border-white 
@@ -169,6 +195,20 @@ export default function FloatingBot() {
                    active:scale-95 transition-all duration-300 transform-gpu
                    hover:bg-white cursor-pointer"
       >
+        <span
+          aria-hidden={!showScrollHint}
+          className={`pointer-events-none absolute right-0 bottom-[calc(100%+8px)] inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/80 bg-gradient-to-r from-sky-50/80 via-white/80 to-rose-50/80 px-3 py-1.5 text-[11px] font-medium tracking-wide text-stone-700 shadow-[0_6px_20px_rgba(70,55,40,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] ring-1 ring-sky-100/50 backdrop-blur-xl transition-all duration-500 ease-out ${
+            showScrollHint
+              ? "translate-y-0 opacity-85"
+              : "translate-y-1 opacity-0"
+          }`}
+        >
+          💬 두 사람 TMI 보기
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-1 right-5 h-2 w-2 rotate-45 border-b border-r border-rose-100/80 bg-rose-50/95"
+          />
+        </span>
         <span className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-300/30 via-rose-300/30 to-amber-300/30 animate-ping pointer-events-none" />
 
         <span className="relative z-10 inline-flex h-9 w-9 -translate-y-px items-center justify-center text-[27px] leading-none group-hover:rotate-12 transition-transform">

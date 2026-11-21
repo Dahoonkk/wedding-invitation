@@ -6,6 +6,12 @@ import { WEDDING } from "../../lib/constants";
 import { kakaoJavaScriptKey, loadKakaoShare } from "../../lib/kakao";
 import { openLoveTerminal } from "../interactive/LoveTerminal";
 
+const fireConfetti = confetti.create(undefined, {
+  resize: true,
+  useWorker: false,
+  disableForReducedMotion: true,
+});
+
 const baseColors = [
   "#38bdf8",
   "#22d3ee",
@@ -19,14 +25,15 @@ const baseColors = [
 let cachedEmojiShapes: confetti.Shape[] = [];
 if (typeof window !== "undefined") {
   try {
-    const water = confetti.shapeFromText({ text: "💧", scalar: 2 });
-    const fire = confetti.shapeFromText({ text: "🔥", scalar: 2 });
-    const rainbow = confetti.shapeFromText({ text: "🌈", scalar: 1.9 });
-    const heart = confetti.shapeFromText({ text: "❤️", scalar: 1.9 });
-    const sparkle = confetti.shapeFromText({ text: "✨", scalar: 1.8 });
-    cachedEmojiShapes = [water, fire, rainbow, heart, sparkle];
+    cachedEmojiShapes = [
+      confetti.shapeFromText({ text: "💧", scalar: 2 }),
+      confetti.shapeFromText({ text: "🔥", scalar: 2 }),
+      confetti.shapeFromText({ text: "🌈", scalar: 1.9 }),
+      confetti.shapeFromText({ text: "❤️", scalar: 1.9 }),
+      confetti.shapeFromText({ text: "✨", scalar: 1.8 }),
+    ];
   } catch {
-    // ignore
+    // Keep regular confetti available on browsers without OffscreenCanvas support.
   }
 }
 
@@ -83,8 +90,6 @@ export default function Closing() {
   const [shareError, setShareError] = useState("");
 
   const lastBurstRef = useRef(0);
-  const likeTapCountRef = useRef(0);
-  const likeTapResetTimerRef = useRef<number | null>(null);
   const specialImageTimerRef = useRef<number | null>(null);
   const pendingRef = useRef(0);
   const flushTimerRef = useRef<number | null>(null);
@@ -274,9 +279,6 @@ export default function Closing() {
 
   useEffect(
     () => () => {
-      if (likeTapResetTimerRef.current) {
-        window.clearTimeout(likeTapResetTimerRef.current);
-      }
       if (specialImageTimerRef.current) {
         window.clearTimeout(specialImageTimerRef.current);
       }
@@ -304,7 +306,7 @@ export default function Closing() {
       zIndex: 9999,
     };
 
-    confetti({
+    fireConfetti({
       ...shortLife,
       particleCount: 35,
       angle: 60,
@@ -314,7 +316,7 @@ export default function Closing() {
       colors: baseColors,
     });
 
-    confetti({
+    fireConfetti({
       ...shortLife,
       particleCount: 35,
       angle: 120,
@@ -325,7 +327,7 @@ export default function Closing() {
     });
 
     if (cachedEmojiShapes.length > 0) {
-      confetti({
+      fireConfetti({
         ...shortLife,
         particleCount: 20,
         angle: 65,
@@ -336,7 +338,7 @@ export default function Closing() {
         scalar: 1.5,
       });
 
-      confetti({
+      fireConfetti({
         ...shortLife,
         particleCount: 20,
         angle: 115,
@@ -353,28 +355,14 @@ export default function Closing() {
     setIsLiking(true);
     setTimeout(() => setIsLiking(false), 300);
 
-    likeTapCountRef.current += 1;
-    if (likeTapResetTimerRef.current) {
-      window.clearTimeout(likeTapResetTimerRef.current);
+    setShowSpecialImage(true);
+    if (specialImageTimerRef.current) {
+      window.clearTimeout(specialImageTimerRef.current);
     }
-
-    if (likeTapCountRef.current >= 2) {
-      likeTapCountRef.current = 0;
-      likeTapResetTimerRef.current = null;
-      setShowSpecialImage(true);
-      if (specialImageTimerRef.current) {
-        window.clearTimeout(specialImageTimerRef.current);
-      }
-      specialImageTimerRef.current = window.setTimeout(() => {
-        setShowSpecialImage(false);
-        specialImageTimerRef.current = null;
-      }, 4000);
-    } else {
-      likeTapResetTimerRef.current = window.setTimeout(() => {
-        likeTapCountRef.current = 0;
-        likeTapResetTimerRef.current = null;
-      }, 2500);
-    }
+    specialImageTimerRef.current = window.setTimeout(() => {
+      setShowSpecialImage(false);
+      specialImageTimerRef.current = null;
+    }, 4000);
 
     // UI 즉시 +1
     setLikes((prev) => prev + 1);
